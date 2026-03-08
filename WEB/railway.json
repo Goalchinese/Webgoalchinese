@@ -4,8 +4,6 @@
   },
   "deploy": {
     "startCommand": "nginx -g 'daemon off;'",
-    "healthcheckPath": "/",
-    "healthcheckTimeout": 600,
     "port": 80,
     "restartPolicyType": "on_failure",
     "restartPolicyMaxRetries": 10
