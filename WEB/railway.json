@@ -3,7 +3,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "nginx -g 'daemon off;'",
+    "startCommand": "nginx",
     "port": 80,
     "restartPolicyType": "on_failure",
     "restartPolicyMaxRetries": 10
