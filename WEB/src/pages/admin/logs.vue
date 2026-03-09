@@ -29,7 +29,7 @@
                 outlined
                 dense
                 hide-details
-                style="max-width: 200px;"
+                style="max-width: 200px"
                 @change="loadLogs"
               ></v-select>
             </div>
@@ -93,7 +93,7 @@ export default {
     generateAvailableDates() {
       const dates = [];
       const today = new Date();
-      
+
       // เพิ่มวันปัจจุบันและ 7 วันย้อนหลัง
       for (let i = 0; i <= 7; i++) {
         const date = new Date(today);
@@ -105,13 +105,13 @@ export default {
             : i === 1
             ? "เมื่อวานนี้"
             : `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-        
+
         dates.push({
           value: dateStr,
           label: label,
         });
       }
-      
+
       this.availableDates = dates;
       this.selectedDate = dates[0].value; // เลือกวันนี้เป็นค่าเริ่มต้น
     },
