@@ -47,7 +47,7 @@
             </div>
 
             <div v-else class="log-container">
-              <pre class="log-content">{{ logContent }}</pre>
+              <div class="log-content" v-html="logContent"></div>
             </div>
           </v-card-text>
         </v-card>
@@ -121,7 +121,10 @@ export default {
         } else {
           // รวม log ทุกวันพร้อมแสดงวันที่
           this.logContent = logs
-            .map((log) => `=== ${log.date} ===\n${log.content}`)
+            .map(
+              (log) =>
+                `<span style="color: #00ff00;">=== ${log.date} ===</span>\n<span style="color: #ffffff;">${log.content}</span>`
+            )
             .join("\n\n");
         }
       } catch (error) {
@@ -148,7 +151,7 @@ export default {
 }
 
 .log-content {
-  color: #00ff00;
+  color: #ffffff;
   font-family: "Courier New", monospace;
   font-size: 12px;
   line-height: 1.4;
