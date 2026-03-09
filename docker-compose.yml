@@ -10,18 +10,17 @@ services:
       - "3000:3000"
     restart: always
     volumes:
-      - ./API/uploads:/usr/src/app/uploads    # Volume for uploads
+      - ./API/uploads:/usr/src/app/uploads
       - ./API/logs:/usr/src/app/logs    
     environment:
       - NODE_ENV=production
-      - DB_HOST=metro.proxy.rlwy.net
+      - DB_HOST=mysql.railway.internal
       - DB_USER=root
       - DB_PASSWORD=ZNfNBEoudeyzZfebELvNIVZupBcvkMWB
       - DB_NAME=railway
       - JWT_SECRET=your_jwt_secret
-      - DB_PORT=48242
-    # depends_on:
-    #   - db
+      - DB_PORT=3306
+      - PORT=3000
 
   frontend:
     container_name: web-frontend
@@ -58,13 +57,13 @@ services:
 
   db:
     container_name: mysql-db
-    image: mysql:5.7
+    image: mysql:9.4
     restart: always
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=@numberoneOFschool01
-      - MYSQL_DATABASE=dailychineseclass
+      - MYSQL_ROOT_PASSWORD=ZNfNBEoudeyzZfebELvNIVZupBcvkMWB
+      - MYSQL_DATABASE=railway
     volumes:
       - ./db_data:/var/lib/mysql
 
