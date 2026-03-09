@@ -116,10 +116,12 @@ export default {
           }
         }
 
+        // แสดงเฉพาะวันที่มี log จริงๆ
         if (logs.length === 0) {
           this.logContent = "ไม่มีข้อมูล log ในช่วง 7 วันที่ผ่านมา";
         } else {
-          // รวม log ทุกวันพร้อมแสดงวันที่
+          // แสดง log เรียงตามวันที่ (เก่าสุดก่อน)
+          logs.reverse();
           this.logContent = logs
             .map(
               (log) =>
