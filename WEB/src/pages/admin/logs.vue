@@ -20,7 +20,7 @@
           <v-card-title class="d-flex justify-space-between align-center">
             <div>
               <v-icon class="mr-2">mdi-file-document-outline</v-icon>
-              {{ logFileName }}
+              System Logs
             </div>
             <v-btn color="primary" icon @click="refreshLogs" :loading="loading">
               <v-icon>mdi-refresh</v-icon>
@@ -81,21 +81,50 @@ export default {
       this.error = null;
 
       try {
-        const today = new Date().toISOString().split("T")[0];
-        const logFileName = `app-${today}.log`;
-        this.logFileName = logFileName;
-
-        const response = await fetch(`${this.baseUrl}logs/${logFileName}`);
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const logs = [];
+        const today = new Date();
+        
+        // โหลด log ย้อนหลัง 7 วัน
+        for (let i = 0; i < 7; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() - i);
+          const dateString = date.toISOString().split("T")[0];
+          const logFileName = `app-${dateString}.log`;
+          
+          try {
+            const response = await fetch(`${this.baseUrl}logs/${logFileName}`);
+            
+            if (response.ok) {
+              const logContent = await response.text();
+              
+              if (logContent.trim()) {
+                const formattedDate = date.toLocaleDateString('th-TH', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                });
+                
+                logs.push({
+                  date: formattedDate,
+                  content: logContent.trim()
+                });
+              }
+            }
+          } catch (error) {
+            // ข้ามวันที่ไม่มี log
+            console.log(`No log file for ${dateString}`);
+          }
         }
-
-        this.logContent = await response.text();
-
-        if (!this.logContent.trim()) {
-          this.logContent = "No logs available for today.";
+        
+        if (logs.length === 0) {
+          this.logContent = "ไม่มีข้อมูล log ในช่วง 7 วันที่ผ่านมา";
+        } else {
+          // รวม log ทุกวันพร้อมแสดงวันที่
+          this.logContent = logs.map(log => 
+            `=== ${log.date} ===\n${log.content}`
+          ).join('\n\n');
         }
+        
       } catch (error) {
         console.error("Error loading logs:", error);
         this.error = `Failed to load logs: ${error.message}`;
