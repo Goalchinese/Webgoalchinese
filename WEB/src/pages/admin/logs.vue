@@ -18,20 +18,9 @@
       <v-col cols="12">
         <v-card outlined>
           <v-card-title class="d-flex justify-space-between align-center">
-            <div class="d-flex align-center">
+            <div>
               <v-icon class="mr-2">mdi-file-document-outline</v-icon>
-              <v-select
-                v-model="selectedDate"
-                :items="availableDates"
-                item-text="label"
-                item-value="value"
-                label="เลือกวันที่"
-                outlined
-                dense
-                hide-details
-                style="max-width: 200px"
-                @change="loadLogs"
-              ></v-select>
+              {{ logFileName }}
             </div>
             <v-btn color="primary" icon @click="refreshLogs" :loading="loading">
               <v-icon>mdi-refresh</v-icon>
@@ -76,8 +65,6 @@ export default {
       error: null,
       logContent: "",
       logFileName: "",
-      selectedDate: null,
-      availableDates: [],
     };
   },
   computed: {
@@ -86,42 +73,16 @@ export default {
     },
   },
   mounted() {
-    this.generateAvailableDates();
     this.loadLogs();
   },
   methods: {
-    generateAvailableDates() {
-      const dates = [];
-      const today = new Date();
-
-      // เพิ่มวันปัจจุบันและ 7 วันย้อนหลัง
-      for (let i = 0; i <= 7; i++) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toISOString().split("T")[0];
-        const label =
-          i === 0
-            ? "วันนี้"
-            : i === 1
-            ? "เมื่อวานนี้"
-            : `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-
-        dates.push({
-          value: dateStr,
-          label: label,
-        });
-      }
-
-      this.availableDates = dates;
-      this.selectedDate = dates[0].value; // เลือกวันนี้เป็นค่าเริ่มต้น
-    },
-
     async loadLogs() {
       this.loading = true;
       this.error = null;
 
       try {
-        const logFileName = `app-${this.selectedDate}.log`;
+        const today = new Date().toISOString().split("T")[0];
+        const logFileName = `app-${today}.log`;
         this.logFileName = logFileName;
 
         const response = await fetch(`${this.baseUrl}/logs/${logFileName}`);
@@ -133,7 +94,7 @@ export default {
         this.logContent = await response.text();
 
         if (!this.logContent.trim()) {
-          this.logContent = "No logs available for this date.";
+          this.logContent = "No logs available for today.";
         }
       } catch (error) {
         console.error("Error loading logs:", error);
