@@ -45,6 +45,5 @@ router.use("/classes", authenticate, classRoutes);
 router.use("/attendances", authenticate, attendanceRoutes);
 router.use("/classEvents", authenticate, classEventsRoutes);
 router.use("/dashboard", authenticate, dashboardRoutes);
-router.use("/logs", authenticate, express.static("logs"));
 
 module.exports = router;
