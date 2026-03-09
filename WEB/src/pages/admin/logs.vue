@@ -85,7 +85,7 @@ export default {
         const logFileName = `app-${today}.log`;
         this.logFileName = logFileName;
 
-        const response = await fetch(`${this.baseUrl}/logs/${logFileName}`);
+        const response = await fetch(`${this.baseUrl}logs/${logFileName}`);
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
