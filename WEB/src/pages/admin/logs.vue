@@ -99,13 +99,16 @@ export default {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
         const dateStr = date.toISOString().split("T")[0];
-        const label = i === 0 ? 'วันนี้' : 
-                     i === 1 ? 'เมื่อวานนี้' : 
-                     `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+        const label =
+          i === 0
+            ? "วันนี้"
+            : i === 1
+            ? "เมื่อวานนี้"
+            : `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
         
         dates.push({
           value: dateStr,
-          label: label
+          label: label,
         });
       }
       
