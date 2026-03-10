@@ -47,6 +47,8 @@ const FeeStructure = sequelize.define(
     indexes: [
       { fields: ["accountID"] },
       { fields: ["payDate"] },
+      { fields: ["classFee"] },
+      { fields: ["payDate", "classFee"] }
     ],
   }
 );

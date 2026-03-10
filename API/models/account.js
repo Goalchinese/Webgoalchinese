@@ -99,6 +99,20 @@ const Account = sequelize.define(
   },
   {
     freezeTableName: true,
+    indexes: [
+      {
+        fields: ['branchID']
+      },
+      {
+        fields: ['addmissionDate']
+      },
+      {
+        fields: ['branchID', 'addmissionDate']
+      },
+      {
+        fields: ['status']
+      }
+    ]
   }
 );
 

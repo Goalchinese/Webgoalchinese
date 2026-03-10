@@ -1,5 +1,9 @@
 const { sequelize, Account } = require("../models");
 
+// Simple in-memory cache for dashboard data
+const dashboardCache = new Map();
+const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
+
 exports.getSummaryUser = async (req, res) => {
   try {
     const result = await sequelize.query(
@@ -112,10 +116,19 @@ FROM
   }
 };
 
-// Combined dashboard data - single API call for all dashboard data
+// Combined dashboard data - single API call for all dashboard data with caching
 exports.getDashboardData = async (req, res) => {
   try {
-    // Run all queries in parallel
+    // Check cache first
+    const cacheKey = 'dashboard-data';
+    const cached = dashboardCache.get(cacheKey);
+    
+    if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
+      console.log('Serving dashboard data from cache');
+      return res.status(200).json(cached.data);
+    }
+
+    // Run all queries in parallel with optimized SQL
     const [summaryUser, summaryBranch, summaryIncome] = await Promise.all([
       // Query 1: Summary User
       sequelize.query(
@@ -178,11 +191,20 @@ exports.getDashboardData = async (req, res) => {
       ),
     ]);
 
-    res.status(200).json({
+    const result = {
       summaryUser: summaryUser[0] || {},
       summaryBranch: summaryBranch || [],
       summaryIncome: summaryIncome || [],
+    };
+
+    // Cache the result
+    dashboardCache.set(cacheKey, {
+      data: result,
+      timestamp: Date.now()
     });
+
+    console.log('Dashboard data cached for 15 minutes');
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: "Error retrieving dashboard data", error: error.message });
   }

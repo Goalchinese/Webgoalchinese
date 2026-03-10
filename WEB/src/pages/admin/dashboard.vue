@@ -164,6 +164,10 @@ export default {
       summaryList: [],
       totalIncome: 0,
       isLoading: true,
+      // Frontend caching
+      dashboardCache: null,
+      cacheTimestamp: null,
+      cacheDuration: 10 * 60 * 1000, // 10 minutes
     };
   },
   computed: {
@@ -172,14 +176,18 @@ export default {
     }),
   },
   async mounted() {
-    // Load all data in parallel for faster page load
+    // Load dashboard data first (without calendar for faster initial load)
     this.isLoading = true;
     try {
       await Promise.all([
         this.fetchSetting(),
-        this.onFetchEvents(),
         this.fetchDashboardData(), // Combined API call instead of 3 separate calls
       ]);
+      
+      // Load calendar after dashboard data is ready
+      setTimeout(() => {
+        this.onFetchEvents();
+      }, 100);
     } finally {
       this.isLoading = false;
     }
@@ -309,59 +317,79 @@ export default {
     },
     async fetchDashboardData() {
       try {
+        // Check frontend cache first
+        if (this.dashboardCache && 
+            this.cacheTimestamp && 
+            (Date.now() - this.cacheTimestamp) < this.cacheDuration) {
+          console.log('Using frontend cache');
+          this.processDashboardData(this.dashboardCache);
+          return;
+        }
+
         const { data } = await this.axios.get(`/dashboard/getData`);
-
-        // Process summaryUser
-        if (data.summaryUser) {
-          this.totalList.forEach((it) => {
-            if (it.name === "Total Student") {
-              it.value = data.summaryUser.totalStudent || 0;
-            } else if (it.name === "Total Teacher") {
-              it.value = data.summaryUser.totalTeacher || 0;
-            } else if (it.name === "Total admin") {
-              it.value = data.summaryUser.totalAdmin || 0;
-            }
-          });
-        }
-
-        // Process summaryBranch
-        if (data.summaryBranch) {
-          data.summaryBranch.forEach((it) => {
-            this.summaryList.push(
-              {
-                name: `Total classes ${it.name}`,
-                value: it.totalClass || 0,
-                color: "primary",
-              },
-              {
-                name: `Total Student ${it.name}`,
-                value: it.totalStudent || 0,
-                color: "success",
-              },
-              {
-                name: `Expiring Classes ${it.name}`,
-                value: it.totalExpireClass || 0,
-                color: "warning",
-              },
-              {
-                name: `Monthly income ${it.name}`,
-                value: it.totalIncomeClass || 0,
-                color: "error",
-              }
-            );
-          });
-        }
-
-        // Process summaryIncome
-        if (data.summaryIncome && data.summaryIncome.length) {
-          this.totalIncome = data.summaryIncome[0].totalIncome || 0;
-        }
+        
+        // Cache the response
+        this.dashboardCache = data;
+        this.cacheTimestamp = Date.now();
+        
+        this.processDashboardData(data);
       } catch (error) {
         this.$swal.fire({
           title: error.response?.data?.error || "Error",
           text: error.response?.data?.details || error.message,
           icon: "error",
         });
+      }
+    },
+
+    processDashboardData(data) {
+      // Process summaryUser
+      if (data.summaryUser) {
+        this.totalList.forEach((it) => {
+          if (it.name === "Total Student") {
+            it.value = data.summaryUser.totalStudent || 0;
+          } else if (it.name === "Total Teacher") {
+            it.value = data.summaryUser.totalTeacher || 0;
+          } else if (it.name === "Total admin") {
+            it.value = data.summaryUser.totalAdmin || 0;
+          }
+        });
+      }
+
+      // Process summaryBranch
+      if (data.summaryBranch) {
+        // Clear summaryList before adding new data
+        this.summaryList = [];
+        
+        data.summaryBranch.forEach((it) => {
+          this.summaryList.push(
+            {
+              name: `Total classes ${it.name}`,
+              value: it.totalClass || 0,
+              color: "primary",
+            },
+            {
+              name: `Total Student ${it.name}`,
+              value: it.totalStudent || 0,
+              color: "success",
+            },
+            {
+              name: `Expiring Classes ${it.name}`,
+              value: it.totalExpireClass || 0,
+              color: "warning",
+            },
+            {
+              name: `Monthly income ${it.name}`,
+              value: it.totalIncomeClass || 0,
+              color: "error",
+            }
+          );
+        });
+      }
+
+      // Process summaryIncome
+      if (data.summaryIncome && data.summaryIncome.length) {
+        this.totalIncome = data.summaryIncome[0].totalIncome || 0;
       }
     },
   },
