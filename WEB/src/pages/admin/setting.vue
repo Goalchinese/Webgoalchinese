@@ -179,7 +179,7 @@
 </template>
 
 <script>
-import { mapState } from "pinia";
+import { mapState, mapActions } from "pinia";
 import { useAppStore } from "@/stores/app";
 
 export default {
@@ -267,6 +267,9 @@ export default {
     );
   },
   methods: {
+    ...mapActions(useAppStore, {
+      setLogoAction: "setLogo",
+    }),
     async fetchSetting() {
       // fetch data from api
       try {
@@ -300,10 +303,14 @@ export default {
         // Update UI immediately with response data
         if (data.setting) {
           if (data.setting.logo) {
-            this.formInput.logo =
-              process.env.VUE_APP_API_IMAGE + data.setting.logo;
+            const logoUrl = process.env.VUE_APP_API_IMAGE + data.setting.logo;
+            this.formInput.logo = logoUrl;
+            // Update logo in store for immediate sidebar update
+            this.setLogoAction(data.setting.logo);
           } else {
             this.formInput.logo = null;
+            // Clear logo in store
+            this.setLogoAction(null);
           }
           this.formInput.academyName =
             data.setting.academyName || this.formInput.academyName;
@@ -348,6 +355,8 @@ export default {
         // Update UI immediately
         this.formInput.file = null;
         this.formInput.logo = null;
+        // Clear logo in store for immediate sidebar update
+        this.setLogoAction(null);
 
         // Show success message
         this.$swal.fire({
