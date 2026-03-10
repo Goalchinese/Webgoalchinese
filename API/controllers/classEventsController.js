@@ -101,7 +101,7 @@ exports.findAll = async (req, res) => {
     // Note: studentId filter temporarily disabled due to performance optimization
 
     const events = await ClassEvents.findAll({
-      where,
+      where: {}, // Simple query first - no filters
       attributes: ["id", "classId", "title", "link", "color", "note", "startDate", "endDate", "updateBy"],
       include: [
         { model: Account, as: "updatedBy", attributes: ["id", "name"], required: false },
@@ -117,7 +117,7 @@ exports.findAll = async (req, res) => {
         },
       ],
       order: [['startDate', 'ASC']],
-      limit: 1000, // Prevent too many records
+      limit: 1000,
     });
 
     // Cache the result
