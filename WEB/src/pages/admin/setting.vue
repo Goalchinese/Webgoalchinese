@@ -296,29 +296,30 @@ export default {
         formData.append("academyName", this.formInput.academyName);
 
         const { data } = await this.axios.post(`/setting`, formData);
-        
+
         // Update UI immediately with response data
         if (data.setting) {
           if (data.setting.logo) {
-            this.formInput.logo = process.env.VUE_APP_API_IMAGE + data.setting.logo;
+            this.formInput.logo =
+              process.env.VUE_APP_API_IMAGE + data.setting.logo;
           } else {
             this.formInput.logo = null;
           }
-          this.formInput.academyName = data.setting.academyName || this.formInput.academyName;
+          this.formInput.academyName =
+            data.setting.academyName || this.formInput.academyName;
         }
-        
+
         // Clear file input after successful save
         this.formInput.file = null;
-        
+
         // Show success message
         this.$swal.fire({
           title: "Success!",
           text: "Settings updated successfully",
           icon: "success",
           timer: 1500,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
-        
       } catch (error) {
         this.$swal.fire({
           title: error.response?.data?.error || "Error",
@@ -339,24 +340,23 @@ export default {
       });
 
       if (isDismissed) return;
-      
+
       this.isSaving = true;
       try {
-        const { data } = await this.axios.delete(`/setting/logo`);
-        
-        // Update UI immediately with response data
+        await this.axios.delete(`/setting/logo`);
+
+        // Update UI immediately
         this.formInput.file = null;
         this.formInput.logo = null;
-        
+
         // Show success message
         this.$swal.fire({
           title: "Success!",
           text: "Logo deleted successfully",
           icon: "success",
           timer: 1500,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
-        
       } catch (error) {
         this.$swal.fire({
           title: error.response?.data?.error || "Error",
