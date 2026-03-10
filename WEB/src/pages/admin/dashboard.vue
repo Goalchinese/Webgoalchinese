@@ -301,14 +301,14 @@ export default {
         this.processDashboardData(data);
       } catch (error) {
         console.error("Dashboard data fetch error:", error);
-        
+
         // Clear cache on error to prevent showing stale data
         this.dashboardCache = null;
         this.cacheTimestamp = null;
-        
+
         // Clear summaryList to prevent showing old data
         this.summaryList = [];
-        
+
         this.$swal.fire({
           title: error.response?.data?.error || "Error",
           text: error.response?.data?.details || error.message,
