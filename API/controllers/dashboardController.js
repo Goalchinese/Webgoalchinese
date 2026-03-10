@@ -154,11 +154,11 @@ exports.getDashboardData = async (req, res) => {
           GROUP BY branchID
         ) c ON b.id = c.branchID
         LEFT JOIN (
-          SELECT branchID, COUNT(id) as totalStudent 
-          FROM Account 
-          WHERE MONTH(addmissionDate) = MONTH(CURRENT_DATE()) 
-            AND YEAR(addmissionDate) = YEAR(CURRENT_DATE()) 
-          GROUP BY branchID
+          SELECT a.branchID, COUNT(a.id) as totalStudent 
+          FROM Account a
+          INNER JOIN StudentType st ON a.studentTypeID = st.id
+          WHERE st.name = 'online' AND a.status = 'Active'
+          GROUP BY a.branchID
         ) a ON b.id = a.branchID
         LEFT JOIN (
           SELECT 
