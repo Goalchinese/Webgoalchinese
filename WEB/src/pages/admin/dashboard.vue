@@ -345,6 +345,9 @@ export default {
     },
 
     processDashboardData(data) {
+      // Clear summaryList at the beginning to prevent duplication
+      this.summaryList = [];
+
       // Process summaryUser
       if (data.summaryUser) {
         this.totalList.forEach((it) => {
@@ -360,9 +363,6 @@ export default {
 
       // Process summaryBranch
       if (data.summaryBranch) {
-        // Clear summaryList before adding new data
-        this.summaryList = [];
-
         data.summaryBranch.forEach((it) => {
           this.summaryList.push(
             {
