@@ -46,6 +46,8 @@
               class="text-none mt-2"
               @click="deleteLogo"
               v-if="userInfo?.role == 'superadmin'"
+              :loading="isSaving"
+              :disabled="isSaving"
             >
               Remove Logo
             </v-btn>
@@ -73,6 +75,8 @@
               class="text-none mt-2"
               @click="saveSetting"
               v-if="userInfo?.role !== 'user' || permission?.edit"
+              :loading="isSaving"
+              :disabled="isSaving"
             >
               Save
             </v-btn>
@@ -188,6 +192,7 @@ export default {
         logo: "",
         academyName: "",
       },
+      isSaving: false,
       editItems: {
         branch: "",
         materialType: "",
@@ -284,19 +289,44 @@ export default {
       }
     },
     async saveSetting() {
+      this.isSaving = true;
       try {
         const formData = new FormData();
         formData.append("logo", this.formInput.file);
         formData.append("academyName", this.formInput.academyName);
 
-        await this.axios.post(`/setting`, formData);
-        this.fetchSetting();
+        const { data } = await this.axios.post(`/setting`, formData);
+        
+        // Update UI immediately with response data
+        if (data.setting) {
+          if (data.setting.logo) {
+            this.formInput.logo = process.env.VUE_APP_API_IMAGE + data.setting.logo;
+          } else {
+            this.formInput.logo = null;
+          }
+          this.formInput.academyName = data.setting.academyName || this.formInput.academyName;
+        }
+        
+        // Clear file input after successful save
+        this.formInput.file = null;
+        
+        // Show success message
+        this.$swal.fire({
+          title: "Success!",
+          text: "Settings updated successfully",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false
+        });
+        
       } catch (error) {
         this.$swal.fire({
-          title: error.response.data.error,
-          text: error.response.data.details,
+          title: error.response?.data?.error || "Error",
+          text: error.response?.data?.details || error.message,
           icon: "error",
         });
+      } finally {
+        this.isSaving = false;
       }
     },
     async deleteLogo() {
@@ -309,17 +339,32 @@ export default {
       });
 
       if (isDismissed) return;
+      
+      this.isSaving = true;
       try {
-        await this.axios.delete(`/setting/logo`);
-        this.fetchSetting();
+        const { data } = await this.axios.delete(`/setting/logo`);
+        
+        // Update UI immediately with response data
         this.formInput.file = null;
         this.formInput.logo = null;
+        
+        // Show success message
+        this.$swal.fire({
+          title: "Success!",
+          text: "Logo deleted successfully",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false
+        });
+        
       } catch (error) {
         this.$swal.fire({
-          title: error.response.data.error,
-          text: error.response.data.details,
+          title: error.response?.data?.error || "Error",
+          text: error.response?.data?.details || error.message,
           icon: "error",
         });
+      } finally {
+        this.isSaving = false;
       }
     },
     async fetchData(uri, items) {
