@@ -40,6 +40,8 @@ const ClassEvents = sequelize.define(
       { fields: ["classId"] },
       { fields: ["updateBy"] },
       { fields: ["startDate", "endDate"] },
+      { fields: ["startDate"] },
+      { fields: ["classId", "startDate"] },
     ],
   }
 );

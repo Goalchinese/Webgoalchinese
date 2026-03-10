@@ -6,6 +6,10 @@ const {
   Branch,
 } = require("../models");
 
+// Simple cache for class events
+const eventsCache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 const logger = require("../logger");
 
 // Create a new Class Event
@@ -76,9 +80,20 @@ exports.copy = async (req, res) => {
 exports.findAll = async (req, res) => {
   try {
     const { branchId, teacherId, studentId } = req.query;
+    
+    // Create cache key based on filters
+    const cacheKey = `events-${branchId || 'all'}-${teacherId || 'all'}-${studentId || 'all'}`;
+    
+    // Check cache first
+    const cached = eventsCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
+      console.log('Serving class events from cache');
+      return res.status(200).json(cached.data);
+    }
+
     let where = {};
     if (branchId) {
-      where = { ...where, "$class.branchId$": branchId };
+      where = { ...where, "$class.branchId$": Number(branchId) };
     }
     if (teacherId) {
       where = { ...where, "$class.teacherId$": teacherId };
@@ -91,26 +106,29 @@ exports.findAll = async (req, res) => {
       where,
       attributes: ["id", "classId", "title", "link", "color", "note", "startDate", "endDate", "updateBy"],
       include: [
-        { model: Account, as: "updatedBy", attributes: ["id", "name"] },
+        { model: Account, as: "updatedBy", attributes: ["id", "name"], required: false },
         {
           model: Class,
           as: "class",
           attributes: ["id", "name", "branchId", "teacherId", "studyPlatform"],
           include: [
-            { model: Account, as: "teacher", attributes: ["id", "name"] },
-            {
-              model: ClassStudent,
-              as: "classStudent",
-              attributes: ["id", "accountID"],
-              include: [
-                { model: Account, as: "account", attributes: ["id", "name"] },
-              ],
-            },
-            { model: Branch, as: "branch", attributes: ["id", "name"] },
+            { model: Account, as: "teacher", attributes: ["id", "name"], required: false },
+            { model: Branch, as: "branch", attributes: ["id", "name"], required: false },
           ],
+          required: false,
         },
       ],
+      order: [['startDate', 'ASC']],
+      limit: 1000, // Prevent too many records
     });
+
+    // Cache the result
+    eventsCache.set(cacheKey, {
+      data: events,
+      timestamp: Date.now()
+    });
+
+    console.log('Class events cached for 5 minutes');
     res.status(200).json(events);
   } catch (error) {
     res
