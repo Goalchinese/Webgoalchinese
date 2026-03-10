@@ -193,7 +193,7 @@ exports.getDashboardData = async (req, res) => {
 
     const result = {
       summaryUser: summaryUser[0] || {},
-      summaryBranch: summaryBranch || [],
+      summaryBranch: summaryBranch[0] ? [summaryBranch[0]] : [], // Take only first item
       summaryIncome: summaryIncome || [],
     };
 
