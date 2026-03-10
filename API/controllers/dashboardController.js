@@ -125,27 +125,48 @@ exports.getDashboardData = async (req, res) => {
           (SELECT COUNT(*) FROM User WHERE role in ('user', 'admin', 'superadmin')) AS totalAdmin`,
         { type: sequelize.QueryTypes.SELECT }
       ),
-      // Query 2: Summary Branch
+      // Query 2: Summary Branch - Optimized with JOINs instead of subqueries
       sequelize.query(
         `SELECT 
-          id, name,
-          (SELECT count(Class.id) FROM Class WHERE Class.branchID = b.id) as totalClass,
-          (SELECT COUNT(a.id) FROM Account a WHERE a.branchID = b.id 
-            AND MONTH(a.addmissionDate) = MONTH(CURRENT_DATE()) 
-            AND YEAR(a.addmissionDate) = YEAR(CURRENT_DATE()) 
-            GROUP BY a.branchID) as totalStudent,
-          (SELECT count(id) FROM (
-            SELECT id FROM Class c WHERE c.id in (
-              SELECT classId FROM Attendance a GROUP BY classId HAVING c.registeredTimes - count(a.id) < 3
-            ) AND c.branchID = b.id AND c.status = 'Active' GROUP BY id, b.id
-          ) subquery) as totalExpireClass,
-          (SELECT sum(totalIncomeClass) FROM (
-            SELECT sum(fs.classFee) as totalIncomeClass FROM Account a, FeeStructure fs 
-            WHERE a.id = fs.accountID AND a.branchID = b.id 
-            AND MONTH(fs.payDate) = MONTH(CURRENT_DATE()) AND YEAR(fs.payDate) = YEAR(CURRENT_DATE()) 
-            GROUP BY a.branchID
-          ) subquery) as totalIncomeClass
-        FROM Branch b`,
+          b.id, 
+          b.name,
+          COALESCE(c.totalClass, 0) as totalClass,
+          COALESCE(a.totalStudent, 0) as totalStudent,
+          COALESCE(e.totalExpireClass, 0) as totalExpireClass,
+          COALESCE(f.totalIncomeClass, 0) as totalIncomeClass
+        FROM Branch b
+        LEFT JOIN (
+          SELECT branchID, COUNT(id) as totalClass 
+          FROM Class 
+          GROUP BY branchID
+        ) c ON b.id = c.branchID
+        LEFT JOIN (
+          SELECT branchID, COUNT(id) as totalStudent 
+          FROM Account 
+          WHERE MONTH(addmissionDate) = MONTH(CURRENT_DATE()) 
+            AND YEAR(addmissionDate) = YEAR(CURRENT_DATE()) 
+          GROUP BY branchID
+        ) a ON b.id = a.branchID
+        LEFT JOIN (
+          SELECT 
+            c.branchID, 
+            COUNT(DISTINCT c.id) as totalExpireClass
+          FROM Class c
+          INNER JOIN Attendance att ON c.id = att.classId
+          WHERE c.status = 'Active'
+          GROUP BY c.id, c.branchID, c.registeredTimes
+          HAVING c.registeredTimes - COUNT(att.id) < 3
+        ) e ON b.id = e.branchID
+        LEFT JOIN (
+          SELECT 
+            a.branchID, 
+            SUM(fs.classFee) as totalIncomeClass
+          FROM Account a
+          INNER JOIN FeeStructure fs ON a.id = fs.accountID
+          WHERE MONTH(fs.payDate) = MONTH(CURRENT_DATE()) 
+            AND YEAR(fs.payDate) = YEAR(CURRENT_DATE())
+          GROUP BY a.branchID
+        ) f ON b.id = f.branchID`,
         { type: sequelize.QueryTypes.SELECT }
       ),
       // Query 3: Summary Income
