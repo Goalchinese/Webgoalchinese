@@ -98,9 +98,7 @@ exports.findAll = async (req, res) => {
     if (teacherId) {
       where = { ...where, "$class.teacherId$": teacherId };
     }
-    if (studentId) {
-      where = { ...where, "$class.classStudent.accountID$": Number(studentId) };
-    }
+    // Note: studentId filter temporarily disabled due to performance optimization
 
     const events = await ClassEvents.findAll({
       where,
