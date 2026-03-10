@@ -166,48 +166,64 @@ exports.getDashboardData = async (req, res) => {
         FROM StudentCounts sc`,
         { type: sequelize.QueryTypes.SELECT }
       ),
-      // Query 2: Summary Branch - Optimized with JOINs instead of subqueries
+      // Query 2: Summary Branch - Dynamic based on student types
       sequelize.query(
-        `SELECT 
-          b.id, 
-          b.name,
-          COALESCE(c.totalClass, 0) as totalClass,
-          COALESCE(a.totalStudent, 0) as totalStudent,
-          COALESCE(e.totalExpireClass, 0) as totalExpireClass,
-          COALESCE(f.totalIncomeClass, 0) as totalIncomeClass
-        FROM Branch b
-        LEFT JOIN (
-          SELECT branchID, COUNT(id) as totalClass 
-          FROM Class 
-          GROUP BY branchID
-        ) c ON b.id = c.branchID
-        LEFT JOIN (
-          SELECT a.branchID, COUNT(a.id) as totalStudent 
-          FROM Account a
-          INNER JOIN StudentType st ON a.studentTypeID = st.id
-          WHERE st.name IN ('online', 'offline') AND a.status = 'Active'
-          GROUP BY a.branchID
-        ) a ON b.id = a.branchID
-        LEFT JOIN (
+        `WITH StudentTypes AS (
+          SELECT id, name FROM StudentType
+        ),
+        BranchStudentStats AS (
           SELECT 
-            c.branchID, 
-            COUNT(DISTINCT c.id) as totalExpireClass
-          FROM Class c
-          INNER JOIN Attendance att ON c.id = att.classId
-          WHERE c.status = 'Active'
-          GROUP BY c.id, c.branchID, c.registeredTimes
-          HAVING c.registeredTimes - COUNT(att.id) < 3
-        ) e ON b.id = e.branchID
-        LEFT JOIN (
-          SELECT 
-            a.branchID, 
-            SUM(fs.classFee) as totalIncomeClass
-          FROM Account a
-          INNER JOIN FeeStructure fs ON a.id = fs.accountID
-          WHERE MONTH(fs.payDate) = MONTH(CURRENT_DATE()) 
-            AND YEAR(fs.payDate) = YEAR(CURRENT_DATE())
-          GROUP BY a.branchID
-        ) f ON b.id = f.branchID`,
+            b.id as branchId,
+            b.name as branchName,
+            st.name as studentTypeName,
+            COALESCE(c.totalClass, 0) as totalClass,
+            COALESCE(a.totalStudent, 0) as totalStudent,
+            COALESCE(e.totalExpireClass, 0) as totalExpireClass,
+            COALESCE(f.totalIncomeClass, 0) as totalIncomeClass
+          FROM Branch b
+          CROSS JOIN StudentTypes st
+          LEFT JOIN (
+            SELECT branchID, COUNT(id) as totalClass 
+            FROM Class 
+            GROUP BY branchID
+          ) c ON b.id = c.branchID
+          LEFT JOIN (
+            SELECT a.branchID, a.studentTypeID, COUNT(a.id) as totalStudent 
+            FROM Account a
+            WHERE a.status = 'Active'
+            GROUP BY a.branchID, a.studentTypeID
+          ) a ON b.id = a.branchID AND st.id = a.studentTypeID
+          LEFT JOIN (
+            SELECT 
+              c.branchID, 
+              COUNT(DISTINCT c.id) as totalExpireClass
+            FROM Class c
+            INNER JOIN Attendance att ON c.id = att.classId
+            WHERE c.status = 'Active'
+            GROUP BY c.id, c.branchID, c.registeredTimes
+            HAVING c.registeredTimes - COUNT(att.id) < 3
+          ) e ON b.id = e.branchID
+          LEFT JOIN (
+            SELECT 
+              a.branchID, 
+              a.studentTypeID,
+              SUM(fs.classFee) as totalIncomeClass
+            FROM Account a
+            INNER JOIN FeeStructure fs ON a.id = fs.accountID
+            WHERE MONTH(fs.payDate) = MONTH(CURRENT_DATE()) 
+              AND YEAR(fs.payDate) = YEAR(CURRENT_DATE())
+            GROUP BY a.branchID, a.studentTypeID
+          ) f ON b.id = f.branchID AND st.id = f.studentTypeID
+        )
+        SELECT 
+          branchId,
+          branchName,
+          studentTypeName,
+          totalClass,
+          totalStudent,
+          totalExpireClass,
+          totalIncomeClass
+        FROM BranchStudentStats`,
         { type: sequelize.QueryTypes.SELECT }
       ),
       // Query 3: Summary Income
@@ -221,7 +237,7 @@ exports.getDashboardData = async (req, res) => {
 
     const result = {
       summaryUser: summaryUser[0] || {},
-      summaryBranch: summaryBranch[0] ? [summaryBranch[0]] : [], // Take only first item
+      summaryBranch: summaryBranch || [],
       summaryIncome: summaryIncome || [],
     };
 
