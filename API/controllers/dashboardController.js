@@ -167,7 +167,7 @@ exports.getDashboardData = async (req, res) => {
           FROM Class c
           INNER JOIN Attendance att ON c.id = att.classId
           WHERE c.status = 'Active'
-          GROUP BY c.id, c.branchID, c.registeredTimes
+          GROUP BY c.branchID
           HAVING c.registeredTimes - COUNT(att.id) < 3
         ) e ON b.id = e.branchID
         LEFT JOIN (
