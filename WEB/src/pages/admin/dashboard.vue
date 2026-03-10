@@ -183,7 +183,7 @@ export default {
         this.fetchSetting(),
         this.fetchDashboardData(), // Combined API call instead of 3 separate calls
       ]);
-      
+
       // Load calendar after dashboard data is ready
       setTimeout(() => {
         this.onFetchEvents();
@@ -318,20 +318,22 @@ export default {
     async fetchDashboardData() {
       try {
         // Check frontend cache first
-        if (this.dashboardCache && 
-            this.cacheTimestamp && 
-            (Date.now() - this.cacheTimestamp) < this.cacheDuration) {
-          console.log('Using frontend cache');
+        if (
+          this.dashboardCache &&
+          this.cacheTimestamp &&
+          Date.now() - this.cacheTimestamp < this.cacheDuration
+        ) {
+          console.log("Using frontend cache");
           this.processDashboardData(this.dashboardCache);
           return;
         }
 
         const { data } = await this.axios.get(`/dashboard/getData`);
-        
+
         // Cache the response
         this.dashboardCache = data;
         this.cacheTimestamp = Date.now();
-        
+
         this.processDashboardData(data);
       } catch (error) {
         this.$swal.fire({
@@ -360,7 +362,7 @@ export default {
       if (data.summaryBranch) {
         // Clear summaryList before adding new data
         this.summaryList = [];
-        
+
         data.summaryBranch.forEach((it) => {
           this.summaryList.push(
             {
