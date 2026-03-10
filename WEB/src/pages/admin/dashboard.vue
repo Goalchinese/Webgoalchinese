@@ -251,42 +251,6 @@ export default {
         });
       }
     },
-    async onFetchSummaryBranch() {
-      try {
-        const { data } = await this.axios.get(`/dashboard/getSummaryBranch`);
-
-        data.forEach((it) => {
-          this.summaryList.push(
-            {
-              name: `Total classes ${it.name}`,
-              value: it.totalClass || 0,
-              color: "primary",
-            },
-            {
-              name: `Total Student ${it.name}`,
-              value: it.totalStudent || 0,
-              color: "success",
-            },
-            {
-              name: `Expiring Classes ${it.name}`,
-              value: it.totalExpireClass || 0,
-              color: "warning",
-            },
-            {
-              name: `Monthly income ${it.name}`,
-              value: it.totalIncomeClass || 0,
-              color: "error",
-            }
-          );
-        });
-      } catch (error) {
-        this.$swal.fire({
-          title: error.response.data.error,
-          text: error.response.data.details,
-          icon: "error",
-        });
-      }
-    },
     async onFetchEvents(branchId) {
       this.events = [];
       try {
