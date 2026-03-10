@@ -2,7 +2,7 @@ const { sequelize, Account } = require("../models");
 
 // Simple in-memory cache for dashboard data
 const dashboardCache = new Map();
-const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
+const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes for near real-time updates
 
 exports.getSummaryUser = async (req, res) => {
   try {

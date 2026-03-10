@@ -167,7 +167,7 @@ export default {
       // Frontend caching
       dashboardCache: null,
       cacheTimestamp: null,
-      cacheDuration: 10 * 60 * 1000, // 10 minutes
+      cacheDuration: 1 * 60 * 1000, // 1 minute for real-time updates
     };
   },
   computed: {
@@ -188,6 +188,11 @@ export default {
       setTimeout(() => {
         this.onFetchEvents();
       }, 100);
+
+      // Auto-refresh dashboard every 30 seconds for real-time updates
+      this.refreshInterval = setInterval(() => {
+        this.fetchDashboardData();
+      }, 30 * 1000);
     } finally {
       this.isLoading = false;
     }
@@ -367,6 +372,12 @@ export default {
         this.totalIncome = data.summaryIncome[0].totalIncome || 0;
       }
     },
+  },
+  beforeDestroy() {
+    // Clear auto-refresh interval when component is destroyed
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
   },
 };
 </script>
