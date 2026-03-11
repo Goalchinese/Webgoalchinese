@@ -127,7 +127,6 @@ exports.findAll = async (req, res) => {
         "updateBy",
       ],
       order: [["startDate", "ASC"]],
-      limit: 1000,
     });
 
     console.log(`Found ${events.length} events from year ${currentYear} onwards`);
