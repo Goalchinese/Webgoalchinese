@@ -105,16 +105,14 @@ exports.findAll = async (req, res) => {
     eventsCache.clear();
     console.log("Cache cleared - using simple query for calendar");
 
-    // Filter events for current year only for better performance
+    // Filter events from current year onwards (exclude old years)
     const currentYear = new Date().getFullYear();
-    const startOfYear = new Date(currentYear, 0, 1); // Jan 1st
-    const endOfYear = new Date(currentYear + 1, 0, 1); // Jan 1st next year
+    const startOfCurrentYear = new Date(currentYear, 0, 1); // Jan 1st of current year
 
     const events = await ClassEvents.findAll({
       where: {
         startDate: {
-          [sequelize.Sequelize.Op.gte]: startOfYear,
-          [sequelize.Sequelize.Op.lt]: endOfYear,
+          [sequelize.Sequelize.Op.gte]: startOfCurrentYear,
         },
       },
       attributes: [
@@ -132,7 +130,7 @@ exports.findAll = async (req, res) => {
       limit: 1000,
     });
 
-    console.log(`Found ${events.length} events for year ${currentYear}`);
+    console.log(`Found ${events.length} events from year ${currentYear} onwards`);
 
     // Cache the result
     eventsCache.set(cacheKey, {
