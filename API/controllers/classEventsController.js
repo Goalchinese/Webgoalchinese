@@ -101,14 +101,9 @@ exports.findAll = async (req, res) => {
       return res.status(200).json(cached.data);
     }
 
-    let where = {};
-    if (branchId) {
-      where = { ...where, "$class.branchId$": Number(branchId) };
-    }
-    if (teacherId) {
-      where = { ...where, "$class.teacherId$": teacherId };
-    }
-    // Note: studentId filter temporarily disabled due to performance optimization
+    // TEMPORARY: Clear cache to ensure fresh data for debugging
+    eventsCache.clear();
+    console.log('Cache cleared for debugging - fetching fresh data');
 
     const events = await ClassEvents.findAll({
       where: {}, // Simple query first - no filters
@@ -137,8 +132,10 @@ exports.findAll = async (req, res) => {
     });
 
     console.log('Class events cached for 30 seconds');
+    console.log(`Found ${events.length} events total`);
     res.status(200).json(events);
   } catch (error) {
+    console.error('Error in findAll:', error);
     res
       .status(500)
       .json({ message: "Error retrieving events", error: error.message });
