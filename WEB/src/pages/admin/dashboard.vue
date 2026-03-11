@@ -263,11 +263,11 @@ export default {
         const { data } = await this.axios.get(
           `/classEvents${branchId ? `?branchId=${branchId}` : ""}`
         );
-        console.log('Dashboard received events:', data?.length || 0, 'events');
-        console.log('First event data:', data?.[0]);
+        console.log("Dashboard received events:", data?.length || 0, "events");
+        console.log("First event data:", data?.[0]);
         this.events = data || [];
       } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error("Error fetching events:", error);
         this.$swal.fire({
           title: error.response.data.error,
           text: error.response.data.details,
