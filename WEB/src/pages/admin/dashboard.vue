@@ -347,25 +347,25 @@ export default {
       // Process summaryBranch
       if (data.summaryBranch && data.summaryBranch.length > 0) {
         data.summaryBranch.forEach((it) => {
-          // Create cards for each student type within each branch
+          // Create cards for each student type (aggregated across all branches)
           this.summaryList.push(
             {
-              name: `Total classes ${it.branchName} ${it.studentTypeName}`,
+              name: `Total classes ${it.studentTypeName}`,
               value: it.totalClass || 0,
               color: "primary",
             },
             {
-              name: `Total Student ${it.branchName} ${it.studentTypeName}`,
+              name: `Total Student ${it.studentTypeName}`,
               value: it.totalStudent || 0,
               color: "success",
             },
             {
-              name: `Expiring Classes ${it.branchName} ${it.studentTypeName}`,
+              name: `Expiring Classes ${it.studentTypeName}`,
               value: it.totalExpireClass || 0,
               color: "warning",
             },
             {
-              name: `Monthly income ${it.branchName} ${it.studentTypeName}`,
+              name: `Monthly income ${it.studentTypeName}`,
               value: it.totalIncomeClass || 0,
               color: "error",
             }

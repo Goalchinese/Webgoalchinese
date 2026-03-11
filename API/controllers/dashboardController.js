@@ -166,64 +166,45 @@ exports.getDashboardData = async (req, res) => {
         FROM StudentCounts sc`,
         { type: sequelize.QueryTypes.SELECT }
       ),
-      // Query 2: Summary Branch - Dynamic based on student types
+      // Query 2: Summary Branch - Group by student type across all branches
       sequelize.query(
         `WITH StudentTypes AS (
           SELECT id, name FROM StudentType
         ),
-        BranchStudentStats AS (
+        StudentTypeStats AS (
           SELECT 
-            b.id as branchId,
-            b.name as branchName,
             st.name as studentTypeName,
-            COALESCE(c.totalClass, 0) as totalClass,
-            COALESCE(a.totalStudent, 0) as totalStudent,
-            COALESCE(e.totalExpireClass, 0) as totalExpireClass,
-            COALESCE(f.totalIncomeClass, 0) as totalIncomeClass
-          FROM Branch b
-          CROSS JOIN StudentTypes st
-          LEFT JOIN (
-            SELECT branchID, COUNT(id) as totalClass 
-            FROM Class 
-            GROUP BY branchID
-          ) c ON b.id = c.branchID
-          LEFT JOIN (
-            SELECT a.branchID, a.studentTypeID, COUNT(a.id) as totalStudent 
-            FROM Account a
-            WHERE a.status = 'Active'
-            GROUP BY a.branchID, a.studentTypeID
-          ) a ON b.id = a.branchID AND st.id = a.studentTypeID
+            COALESCE(SUM(c.totalClass), 0) as totalClass,
+            COALESCE(SUM(a.totalStudent), 0) as totalStudent,
+            COALESCE(SUM(e.totalExpireClass), 0) as totalExpireClass,
+            COALESCE(SUM(f.totalIncomeClass), 0) as totalIncomeClass
+          FROM StudentTypes st
           LEFT JOIN (
             SELECT 
-              c.branchID, 
-              COUNT(DISTINCT c.id) as totalExpireClass
-            FROM Class c
-            INNER JOIN Attendance att ON c.id = att.classId
-            WHERE c.status = 'Active'
-            GROUP BY c.id, c.branchID, c.registeredTimes
-            HAVING c.registeredTimes - COUNT(att.id) < 3
-          ) e ON b.id = e.branchID
-          LEFT JOIN (
-            SELECT 
-              a.branchID, 
               a.studentTypeID,
-              SUM(fs.classFee) as totalIncomeClass
-            FROM Account a
-            INNER JOIN FeeStructure fs ON a.id = fs.accountID
-            WHERE MONTH(fs.payDate) = MONTH(CURRENT_DATE()) 
+              COUNT(DISTINCT c.id) as totalClass,
+              COUNT(a.id) as totalStudent,
+              COUNT(DISTINCT CASE WHEN c.registeredTimes - COUNT(att.id) < 3 THEN c.id END) as totalExpireClass,
+              COALESCE(SUM(fs.classFee), 0) as totalIncomeClass
+            FROM StudentTypes st2
+            LEFT JOIN Account a ON st2.id = a.studentTypeID AND a.status = 'Active'
+            LEFT JOIN Class c ON a.branchID = c.branchID
+            LEFT JOIN Attendance att ON c.id = att.classId
+            LEFT JOIN FeeStructure fs ON a.id = fs.accountID 
+              AND MONTH(fs.payDate) = MONTH(CURRENT_DATE()) 
               AND YEAR(fs.payDate) = YEAR(CURRENT_DATE())
-            GROUP BY a.branchID, a.studentTypeID
-          ) f ON b.id = f.branchID AND st.id = f.studentTypeID
+            WHERE a.id IS NOT NULL
+            GROUP BY st2.id, a.studentTypeID
+          ) combined ON st.id = combined.studentTypeID
+          GROUP BY st.id, st.name
         )
         SELECT 
-          branchId,
-          branchName,
           studentTypeName,
           totalClass,
           totalStudent,
           totalExpireClass,
           totalIncomeClass
-        FROM BranchStudentStats`,
+        FROM StudentTypeStats`,
         { type: sequelize.QueryTypes.SELECT }
       ),
       // Query 3: Summary Income
