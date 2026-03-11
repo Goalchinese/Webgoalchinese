@@ -5,7 +5,7 @@ const {
   ClassStudent,
   Branch,
 } = require("../models");
-const { sequelize } = require("../config/database");
+const { Sequelize } = require("sequelize");
 
 // Simple cache for class events
 const eventsCache = new Map();
@@ -113,7 +113,7 @@ exports.findAll = async (req, res) => {
     const events = await ClassEvents.findAll({
       where: {
         startDate: {
-          [sequelize.Sequelize.Op.gte]: startOfCurrentYear,
+          [Sequelize.Op.gte]: startOfCurrentYear,
         },
       },
       attributes: [
