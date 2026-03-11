@@ -669,6 +669,7 @@ export default {
     eventsItems: {
       immediate: true,
       handler(val) {
+        console.log('Calendar eventsItems changed:', val?.length || 0, 'events');
         if (val) this.getEvents();
       },
     },
@@ -912,6 +913,9 @@ export default {
 
     getEvents() {
       let temp = this.eventsItems;
+      console.log('Calendar getEvents called with:', temp.length, 'events');
+      console.log('First event:', temp[0]);
+      
       // if (this.eventsItems.length === 0) return;
       for (let i = 0; i < temp.length; i++) {
         const event = temp[i];
@@ -921,6 +925,7 @@ export default {
         event.timed = true;
       }
       this.events = temp;
+      console.log('Calendar events set to:', this.events.length);
       this.$nextTick(() => {
         this.$refs.calendar.checkChange();
       });
