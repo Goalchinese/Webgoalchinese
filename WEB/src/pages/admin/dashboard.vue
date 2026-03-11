@@ -157,9 +157,8 @@ export default {
       editTarget: false,
       events: [],
       totalList: [
-        { name: "Total Online Student", value: 0, color: "warning" },
-        { name: "Total Offline Student", value: 0, color: "info" },
-        { name: "Total Teacher", value: 0, color: "success" },
+        { name: "Total Student", value: 0, color: "warning" },
+        { name: "Total Teacher", value: 0, color: "info" },
         { name: "Total admin", value: 0, color: "success" },
       ],
       summaryList: [],
@@ -241,10 +240,9 @@ export default {
         const { data } = await this.axios.get(`/dashboard/getSummaryUser`);
 
         this.totalList.forEach((it) => {
-          if (it.name === "Total Online Student") {
-            it.value = data.totalOnlineStudent || 0;
-          } else if (it.name === "Total Offline Student") {
-            it.value = data.totalOfflineStudent || 0;
+          if (it.name === "Total Student") {
+            it.value =
+              (data.totalOnlineStudent || 0) + (data.totalOfflineStudent || 0);
           } else if (it.name === "Total Teacher") {
             it.value = data.totalTeacher || 0;
           } else if (it.name === "Total admin") {
@@ -332,10 +330,10 @@ export default {
       // Process summaryUser
       if (data.summaryUser) {
         this.totalList.forEach((it) => {
-          if (it.name === "Total Online Student") {
-            it.value = data.summaryUser.totalOnlineStudent || 0;
-          } else if (it.name === "Total Offline Student") {
-            it.value = data.summaryUser.totalOfflineStudent || 0;
+          if (it.name === "Total Student") {
+            it.value =
+              (data.summaryUser.totalOnlineStudent || 0) +
+              (data.summaryUser.totalOfflineStudent || 0);
           } else if (it.name === "Total Teacher") {
             it.value = data.summaryUser.totalTeacher || 0;
           } else if (it.name === "Total admin") {
