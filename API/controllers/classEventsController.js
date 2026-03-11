@@ -105,6 +105,21 @@ exports.findAll = async (req, res) => {
     eventsCache.clear();
     console.log('Cache cleared for debugging - fetching fresh data');
 
+    // DEBUG: Test simple query first
+    console.log('Testing simple query...');
+    const simpleEvents = await ClassEvents.findAll({
+      attributes: ["id", "classId", "title", "startDate", "endDate"],
+      order: [['startDate', 'ASC']],
+      limit: 50,
+    });
+    console.log(`Simple query found: ${simpleEvents.length} events`);
+
+    // DEBUG: Check specific event
+    const testEvent = await ClassEvents.findByPk(2518);
+    console.log('Event 2518 exists:', !!testEvent, testEvent?.toJSON());
+
+    // DEBUG: Test with includes
+    console.log('Testing with includes...');
     const events = await ClassEvents.findAll({
       where: {}, // Simple query first - no filters
       attributes: ["id", "classId", "title", "link", "color", "note", "startDate", "endDate", "updateBy"],
@@ -124,6 +139,14 @@ exports.findAll = async (req, res) => {
       order: [['startDate', 'ASC']],
       limit: 1000,
     });
+
+    console.log(`Complex query found: ${events.length} events`);
+    
+    // DEBUG: Show differences
+    if (simpleEvents.length !== events.length) {
+      console.log(`⚠️  DIFFERENCE: Simple=${simpleEvents.length}, Complex=${events.length}`);
+      console.log('Missing events due to JOIN issues!');
+    }
 
     // Cache the result
     eventsCache.set(cacheKey, {
