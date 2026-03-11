@@ -101,60 +101,46 @@ exports.findAll = async (req, res) => {
       return res.status(200).json(cached.data);
     }
 
-    // TEMPORARY: Clear cache to ensure fresh data for debugging
+    // TEMPORARY: Use simple query to fix calendar issue
     eventsCache.clear();
-    console.log('Cache cleared for debugging - fetching fresh data');
+    console.log("Cache cleared - using simple query for calendar");
 
-    // DEBUG: Test simple query first
-    console.log('Testing simple query...');
-    const simpleEvents = await ClassEvents.findAll({
-      attributes: ["id", "classId", "title", "startDate", "endDate"],
-      order: [['startDate', 'ASC']],
-      limit: 50,
-    });
-    console.log(`Simple query found: ${simpleEvents.length} events`);
+    // Filter events for current year only for better performance
+    const currentYear = new Date().getFullYear();
+    const startOfYear = new Date(currentYear, 0, 1); // Jan 1st
+    const endOfYear = new Date(currentYear + 1, 0, 1); // Jan 1st next year
 
-    // DEBUG: Check specific event
-    const testEvent = await ClassEvents.findByPk(2518);
-    console.log('Event 2518 exists:', !!testEvent, testEvent?.toJSON());
-
-    // DEBUG: Test with includes
-    console.log('Testing with includes...');
     const events = await ClassEvents.findAll({
-      where: {}, // Simple query first - no filters
-      attributes: ["id", "classId", "title", "link", "color", "note", "startDate", "endDate", "updateBy"],
-      include: [
-        { model: Account, as: "updatedBy", attributes: ["id", "name"], required: false },
-        {
-          model: Class,
-          as: "class",
-          attributes: ["id", "name", "branchId", "teacherId", "studyPlatform"],
-          include: [
-            { model: Account, as: "teacher", attributes: ["id", "name"], required: false },
-            { model: Branch, as: "branch", attributes: ["id", "name"], required: false },
-          ],
-          required: false,
+      where: {
+        startDate: {
+          [sequelize.Sequelize.Op.gte]: startOfYear,
+          [sequelize.Sequelize.Op.lt]: endOfYear,
         },
+      },
+      attributes: [
+        "id",
+        "classId",
+        "title",
+        "link",
+        "color",
+        "note",
+        "startDate",
+        "endDate",
+        "updateBy",
       ],
-      order: [['startDate', 'ASC']],
+      order: [["startDate", "ASC"]],
       limit: 1000,
     });
 
-    console.log(`Complex query found: ${events.length} events`);
-    
-    // DEBUG: Show differences
-    if (simpleEvents.length !== events.length) {
-      console.log(`⚠️  DIFFERENCE: Simple=${simpleEvents.length}, Complex=${events.length}`);
-      console.log('Missing events due to JOIN issues!');
-    }
+    console.log(`Found ${events.length} events for year ${currentYear}`);
 
     // Cache the result
     eventsCache.set(cacheKey, {
       data: events,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
-    console.log('Class events cached for 30 seconds');
+    console.log("Class events cached for 30 seconds");
     console.log(`Found ${events.length} events total`);
     res.status(200).json(events);
   } catch (error) {
