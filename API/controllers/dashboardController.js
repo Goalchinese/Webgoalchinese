@@ -7,24 +7,15 @@ const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes for near real-time updates
 exports.getSummaryUser = async (req, res) => {
   try {
     const result = await sequelize.query(
-      `WITH StudentTypes AS (
-        SELECT id, name FROM StudentType
-      ),
-      StudentCounts AS (
-        SELECT 
-          st.id as studentTypeId,
-          st.name as studentTypeName,
-          COUNT(a.id) as studentCount
-        FROM StudentTypes st
-        LEFT JOIN Account a ON st.id = a.studentTypeID AND a.status = 'Active'
-        GROUP BY st.id, st.name
-      )
-      SELECT
-        COALESCE(SUM(CASE WHEN sc.studentTypeName = 'online' THEN sc.studentCount ELSE 0 END), 0) AS totalOnlineStudent,
-        COALESCE(SUM(CASE WHEN sc.studentTypeName = 'offline' THEN sc.studentCount ELSE 0 END), 0) AS totalOfflineStudent,
+      `SELECT
+        (SELECT COUNT(*) FROM Account a 
+         INNER JOIN StudentType st ON a.studentTypeID = st.id 
+         WHERE st.name = 'online' AND a.status = 'Active') AS totalOnlineStudent,
+        (SELECT COUNT(*) FROM Account a 
+         INNER JOIN StudentType st ON a.studentTypeID = st.id 
+         WHERE st.name = 'offline' AND a.status = 'Active') AS totalOfflineStudent,
         (SELECT COUNT(*) FROM User WHERE role = 'teacher') AS totalTeacher,
-        (SELECT COUNT(*) FROM User WHERE role in ('user', 'admin', 'superadmin')) AS totalAdmin
-      FROM StudentCounts sc`,
+        (SELECT COUNT(*) FROM User WHERE role in ('user', 'admin', 'superadmin')) AS totalAdmin`,
       { type: sequelize.QueryTypes.SELECT }
     );
 
@@ -144,26 +135,17 @@ exports.getDashboardData = async (req, res) => {
 
     // Run all queries in parallel with optimized SQL
     const [summaryUser, summaryBranch, summaryIncome] = await Promise.all([
-      // Query 1: Summary User (dynamic based on student types in settings)
+      // Query 1: Summary User (simple subqueries)
       sequelize.query(
-        `WITH StudentTypes AS (
-          SELECT id, name FROM StudentType
-        ),
-        StudentCounts AS (
-          SELECT 
-            st.id as studentTypeId,
-            st.name as studentTypeName,
-            COUNT(a.id) as studentCount
-          FROM StudentTypes st
-          LEFT JOIN Account a ON st.id = a.studentTypeID AND a.status = 'Active'
-          GROUP BY st.id, st.name
-        )
-        SELECT
-          COALESCE(SUM(CASE WHEN sc.studentTypeName = 'online' THEN sc.studentCount ELSE 0 END), 0) AS totalOnlineStudent,
-          COALESCE(SUM(CASE WHEN sc.studentTypeName = 'offline' THEN sc.studentCount ELSE 0 END), 0) AS totalOfflineStudent,
+        `SELECT
+          (SELECT COUNT(*) FROM Account a 
+           INNER JOIN StudentType st ON a.studentTypeID = st.id 
+           WHERE st.name = 'online' AND a.status = 'Active') AS totalOnlineStudent,
+          (SELECT COUNT(*) FROM Account a 
+           INNER JOIN StudentType st ON a.studentTypeID = st.id 
+           WHERE st.name = 'offline' AND a.status = 'Active') AS totalOfflineStudent,
           (SELECT COUNT(*) FROM User WHERE role = 'teacher') AS totalTeacher,
-          (SELECT COUNT(*) FROM User WHERE role in ('user', 'admin', 'superadmin')) AS totalAdmin
-        FROM StudentCounts sc`,
+          (SELECT COUNT(*) FROM User WHERE role in ('user', 'admin', 'superadmin')) AS totalAdmin`,
         { type: sequelize.QueryTypes.SELECT }
       ),
       // Query 2: Summary Branch - Group by student type across all branches
