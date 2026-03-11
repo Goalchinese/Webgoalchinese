@@ -5,6 +5,7 @@ const {
   ClassStudent,
   Branch,
 } = require("../models");
+const { sequelize } = require("../config/database");
 
 // Simple cache for class events
 const eventsCache = new Map();
