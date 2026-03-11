@@ -8,14 +8,22 @@ const {
 
 // Simple cache for class events
 const eventsCache = new Map();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 30 * 1000; // 30 seconds for near real-time updates
 
 const logger = require("../logger");
+
+// Clear cache function
+const clearEventsCache = () => {
+  eventsCache.clear();
+  console.log('Events cache cleared');
+};
 
 // Create a new Class Event
 exports.create = async (req, res) => {
   try {
     const newEvent = await ClassEvents.create(req.body);
+    // Clear cache after creating event
+    clearEventsCache();
     res
       .status(201)
       .json({ message: "Event created successfully", data: newEvent });
@@ -63,6 +71,8 @@ exports.copy = async (req, res) => {
         updateBy: req.user.accountID,
       }))
     );
+    // Clear cache after copying events
+    clearEventsCache();
     res.status(201).json({ message: "Event created successfully" });
 
     logger.info(
@@ -126,7 +136,7 @@ exports.findAll = async (req, res) => {
       timestamp: Date.now()
     });
 
-    console.log('Class events cached for 5 minutes');
+    console.log('Class events cached for 30 seconds');
     res.status(200).json(events);
   } catch (error) {
     res
@@ -159,6 +169,8 @@ exports.update = async (req, res) => {
     if (!updated) {
       return res.status(404).json({ message: "Event not found" });
     }
+    // Clear cache after updating event
+    clearEventsCache();
     const updatedEvent = await ClassEvents.findByPk(id);
     res
       .status(200)
@@ -182,6 +194,8 @@ exports.delete = async (req, res) => {
     if (!deleted) {
       return res.status(404).json({ message: "Event not found" });
     }
+    // Clear cache after deleting event
+    clearEventsCache();
     res.status(204).send({ message: "Event deleted successfully" });
 
     logger.info(`Event deleted: ${id} by [${req.user.id}]${req.user.username}`);
