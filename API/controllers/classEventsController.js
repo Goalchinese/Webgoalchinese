@@ -126,6 +126,8 @@ exports.findAll = async (req, res) => {
         "startDate",
         "endDate",
         "updateBy",
+        "updatedAt",
+        "createdAt",
       ],
       include: [
         {
