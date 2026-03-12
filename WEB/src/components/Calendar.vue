@@ -484,14 +484,14 @@
 
                 <span>{{ selectedClass?.teacher?.name }}</span>
               </v-col>
-              <v-col cols="12" class="d-flex align-center">
+              <v-col cols="12" class="d-flex flex-wrap align-center">
                 <v-icon color="primary">mdi-timer-edit-outline</v-icon>
 
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
                 <!-- Show loading state while fetching -->
-                <div v-if="loadingStudents" class="mt-2">
-                  <v-chip small color="grey" outlined>
+                <template v-if="loadingStudents">
+                  <v-chip small color="grey" outlined class="ml-2">
                     <v-progress-circular
                       indeterminate
                       size="12"
@@ -500,10 +500,18 @@
                     ></v-progress-circular>
                     Loading students...
                   </v-chip>
-                </div>
-                <!-- Show students when available -->
+                </template>
+                <!-- Show single student -->
                 <template
-                  v-else-if="getStudentsInClass(selectedClass).length > 0"
+                  v-else-if="getStudentsInClass(selectedClass).length === 1"
+                >
+                  <v-chip small color="primary" outlined class="ml-2">
+                    {{ getStudentsInClass(selectedClass)[0].account.name }}
+                  </v-chip>
+                </template>
+                <!-- Show multiple students -->
+                <template
+                  v-else-if="getStudentsInClass(selectedClass).length > 1"
                 >
                   <div class="mt-2">
                     <v-chip
