@@ -490,13 +490,14 @@
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
                 <!-- Debug: Show raw data -->
-                <div v-if="selectedClass" style="font-size: 10px; color: grey">
+                <div v-if="selectedClass" style="font-size: 10px; color: grey;">
                   Debug: {{ JSON.stringify(selectedClass.classStudent) }}
                 </div>
 
                 <!-- Always show students if available -->
                 <template
                   v-if="
+                    selectedClass &&
                     selectedClass.classStudent &&
                     selectedClass.classStudent.length > 0
                   "
@@ -515,7 +516,7 @@
                   </div>
                 </template>
                 <template v-else>
-                  <span style="color: grey">No students in this class</span>
+                  <span style="color: grey;">No students in this class</span>
                 </template>
               </v-col>
               <v-col cols="12" class="d-flex align-center">
