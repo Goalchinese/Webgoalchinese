@@ -489,7 +489,22 @@
 
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
-                <template v-if="getStudentsInClass(selectedClass).length > 0">
+                <!-- Show loading state while fetching -->
+                <div v-if="loadingStudents" class="mt-2">
+                  <v-chip small color="grey" outlined>
+                    <v-progress-circular
+                      indeterminate
+                      size="12"
+                      width="2"
+                      class="mr-2"
+                    ></v-progress-circular>
+                    Loading students...
+                  </v-chip>
+                </div>
+                <!-- Show students when available -->
+                <template
+                  v-else-if="getStudentsInClass(selectedClass).length > 0"
+                >
                   <div class="mt-2">
                     <v-chip
                       v-for="(student, index) in getStudentsInClass(
@@ -505,7 +520,7 @@
                     </v-chip>
                   </div>
                 </template>
-                <!-- Show no students when no data -->
+                <!-- Show no students when not loading and no data -->
                 <template v-else>
                   <span style="color: grey">No students in this class</span>
                 </template>
@@ -1034,6 +1049,9 @@ export default {
     async fetchStudentsForClass(classId) {
       if (!classId) return;
 
+      // Set loading state
+      this.loadingStudents = true;
+
       try {
         const { data } = await this.axios.get(`/classes/${classId}`);
         this.classStudents[classId] = data.classStudent || [];
@@ -1041,6 +1059,9 @@ export default {
         this.$forceUpdate();
       } catch (error) {
         console.error("Error fetching students for class:", error);
+      } finally {
+        // Clear loading state
+        this.loadingStudents = false;
       }
     },
   },
