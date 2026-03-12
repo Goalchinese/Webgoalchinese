@@ -704,7 +704,7 @@ export default {
         // Update form input
         this.formInput.title = newClass?.name;
         this.formInput.link = newClass?.link;
-        
+
         // Fetch students when class is selected and wait for completion
         if (newClass && newClass.id) {
           await this.fetchStudentsForClass(newClass.id);
