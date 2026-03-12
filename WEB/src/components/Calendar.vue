@@ -277,12 +277,7 @@
               <span class="subtitle-2 mx-2">Student in class :</span>
 
               <template v-if="selectedEvent?.class?.classStudent?.length === 1">
-                <v-chip
-                  small
-                  color="primary"
-                  outlined
-                  class="ml-2"
-                >
+                <v-chip small color="primary" outlined class="ml-2">
                   {{ selectedEvent.class.classStudent[0].account.name }}
                 </v-chip>
               </template>
