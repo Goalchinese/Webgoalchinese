@@ -490,21 +490,15 @@
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
                 <!-- Debug: Show raw data -->
-                <div v-if="selectedClass" style="font-size: 10px; color: grey">
-                  Debug: {{ JSON.stringify(getStudentsInClass(selectedClass)) }}
+                <div v-if="selectedClass" style="font-size: 10px; color: grey;">
+                  Debug: {{ JSON.stringify(selectedClass.classStudent) }}
                 </div>
 
-                <template v-if="getStudentsInClass(selectedClass).length === 1">
-                  <v-chip small color="primary" outlined class="ml-2">
-                    {{ getStudentsInClass(selectedClass)[0].account.name }}
-                  </v-chip>
-                </template>
-                <template v-else>
+                <!-- Always show students if available -->
+                <template v-if="selectedClass.classStudent && selectedClass.classStudent.length > 0">
                   <div class="mt-2">
                     <v-chip
-                      v-for="(student, index) in getStudentsInClass(
-                        selectedClass
-                      )"
+                      v-for="(student, index) in selectedClass.classStudent"
                       :key="index"
                       class="ma-1"
                       small
@@ -514,6 +508,9 @@
                       {{ student.account.name }}
                     </v-chip>
                   </div>
+                </template>
+                <template v-else>
+                  <span style="color: grey;">No students in this class</span>
                 </template>
               </v-col>
               <v-col cols="12" class="d-flex align-center">
@@ -705,14 +702,24 @@ export default {
   watch: {
     selectedClass: {
       immediate: true,
-      handler(newClass) {
-        // Fetch students when class is selected
-        if (newClass && newClass.id) {
-          this.fetchStudentsForClass(newClass.id);
-        }
+      async handler(newClass) {
         // Update form input
         this.formInput.title = newClass?.name;
         this.formInput.link = newClass?.link;
+        
+        // Fetch students when class is selected and store directly in selectedClass
+        if (newClass && newClass.id) {
+          try {
+            const { data } = await this.axios.get(`/classes/${newClass.id}`);
+            console.log("Fetched students for class:", newClass.id, data.classStudent);
+            
+            // Store students directly in selectedClass for easy access
+            this.$set(this.selectedClass, 'classStudent', data.classStudent || []);
+          } catch (error) {
+            console.error("Error fetching students for class:", error);
+            this.$set(this.selectedClass, 'classStudent', []);
+          }
+        }
       },
     },
     eventsItems: {
@@ -1031,6 +1038,8 @@ export default {
 
       const students = this.classStudents[selectedClass.id];
       console.log("getStudentsInClass called:", selectedClass.id, students);
+      console.log("classStudents cache:", this.classStudents);
+      
       if (!students || students.length === 0) return [];
 
       return students.filter((student) => student.account?.name);
@@ -1042,9 +1051,13 @@ export default {
       try {
         const { data } = await this.axios.get(`/classes/${classId}`);
         console.log("Fetched students for class:", classId, data.classStudent);
+        
+        // Store the data and also return it directly
         this.classStudents[classId] = data.classStudent || [];
+        return data.classStudent || [];
       } catch (error) {
         console.error("Error fetching students for class:", error);
+        return [];
       }
     },
   },
