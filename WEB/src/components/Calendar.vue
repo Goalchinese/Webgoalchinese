@@ -489,6 +489,11 @@
 
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
+                <!-- Debug: Show raw data -->
+                <div v-if="selectedClass" style="font-size: 10px; color: grey;">
+                  Debug: {{ JSON.stringify(getStudentsInClass(selectedClass)) }}
+                </div>
+
                 <template v-if="getStudentsInClass(selectedClass).length === 1">
                   <v-chip small color="primary" outlined class="ml-2">
                     {{ getStudentsInClass(selectedClass)[0].account.name }}
