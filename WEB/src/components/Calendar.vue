@@ -489,8 +489,20 @@
 
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
-                <!-- Always show students if available -->
-                <template v-if="getStudentsInClass(selectedClass).length > 0">
+                <!-- Show loading state while fetching -->
+                <div v-if="loadingStudents" class="mt-2">
+                  <v-chip small color="grey" outlined>
+                    <v-progress-circular
+                      indeterminate
+                      size="12"
+                      width="2"
+                      class="mr-2"
+                    ></v-progress-circular>
+                    Loading students...
+                  </v-chip>
+                </div>
+                <!-- Show students when available -->
+                <template v-else-if="getStudentsInClass(selectedClass).length > 0">
                   <div class="mt-2">
                     <v-chip
                       v-for="(student, index) in getStudentsInClass(
@@ -506,8 +518,9 @@
                     </v-chip>
                   </div>
                 </template>
+                <!-- Show no students when not loading and no data -->
                 <template v-else>
-                  <span style="color: grey">No students in this class</span>
+                  <span style="color: grey;">No students in this class</span>
                 </template>
               </v-col>
               <v-col cols="12" class="d-flex align-center">
@@ -690,6 +703,7 @@ export default {
     },
     flagCreate: true,
     classStudents: {}, // Cache for students by class ID
+    loadingStudents: false, // Loading state for students
   }),
   computed: {
     ...mapState(useAppStore, {
@@ -699,14 +713,14 @@ export default {
   watch: {
     selectedClass: {
       immediate: true,
-      async handler(newClass) {
+      handler(newClass) {
         // Update form input
         this.formInput.title = newClass?.name;
         this.formInput.link = newClass?.link;
         
-        // Fetch students when class is selected and wait for data
+        // Fetch students when class is selected (non-blocking)
         if (newClass && newClass.id) {
-          await this.fetchStudentsForClass(newClass.id);
+          this.fetchStudentsForClass(newClass.id);
         }
       },
     },
@@ -1033,15 +1047,18 @@ export default {
     async fetchStudentsForClass(classId) {
       if (!classId) return;
 
+      // Set loading state
+      this.loadingStudents = true;
+
       try {
         const { data } = await this.axios.get(`/classes/${classId}`);
-        console.log("Fetched students for class:", classId, data.classStudent);
         this.classStudents[classId] = data.classStudent || [];
-        
-        // Force Vue to re-render the component
-        this.$forceUpdate();
       } catch (error) {
         console.error("Error fetching students for class:", error);
+        this.classStudents[classId] = [];
+      } finally {
+        // Clear loading state
+        this.loadingStudents = false;
       }
     },
   },
