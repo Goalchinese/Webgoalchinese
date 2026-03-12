@@ -490,24 +490,24 @@
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
                 <template v-if="selectedClass?.classStudent?.length === 1">
-                <v-chip small color="primary" outlined class="ml-2">
-                  {{ selectedClass.classStudent[0].account.name }}
-                </v-chip>
-              </template>
-              <template v-else>
-                <div class="mt-2">
-                  <v-chip
-                    v-for="(student, index) in selectedClass?.classStudent"
-                    :key="index"
-                    class="ma-1"
-                    small
-                    color="primary"
-                    outlined
-                  >
-                    {{ student.account.name }}
+                  <v-chip small color="primary" outlined class="ml-2">
+                    {{ selectedClass.classStudent[0].account.name }}
                   </v-chip>
-                </div>
-              </template>
+                </template>
+                <template v-else>
+                  <div class="mt-2">
+                    <v-chip
+                      v-for="(student, index) in selectedClass?.classStudent"
+                      :key="index"
+                      class="ma-1"
+                      small
+                      color="primary"
+                      outlined
+                    >
+                      {{ student.account.name }}
+                    </v-chip>
+                  </div>
+                </template>
               </v-col>
               <v-col cols="12" class="d-flex align-center">
                 <v-icon color="primary">mdi-tag</v-icon>
@@ -743,7 +743,7 @@ export default {
       try {
         // Get all classes without pagination for dropdown
         const { data: dataClass } = await this.axios.get(`/classes?limit=1000`);
-        
+
         // Pre-fetch students for all classes
         const classesWithStudents = await Promise.all(
           dataClass.data.map(async (classItem) => {
@@ -767,7 +767,7 @@ export default {
             }
           })
         );
-        
+
         this.itemsOptions.class = classesWithStudents;
 
         const { data: dataBranch } = await this.axios.get(`/branch`);
