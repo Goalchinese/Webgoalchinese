@@ -284,7 +284,8 @@
               <template v-else>
                 <div class="mt-2">
                   <v-chip
-                    v-for="(student, index) in selectedEvent?.class?.classStudent"
+                    v-for="(student, index) in selectedEvent?.class
+                      ?.classStudent"
                     :key="index"
                     class="ma-1"
                     small
