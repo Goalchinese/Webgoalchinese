@@ -490,24 +490,26 @@
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
                 <template v-if="getStudentsInClass(selectedClass).length === 1">
-                <v-chip small color="primary" outlined class="ml-2">
-                  {{ getStudentsInClass(selectedClass)[0].account.name }}
-                </v-chip>
-              </template>
-              <template v-else>
-                <div class="mt-2">
-                  <v-chip
-                    v-for="(student, index) in getStudentsInClass(selectedClass)"
-                    :key="index"
-                    class="ma-1"
-                    small
-                    color="primary"
-                    outlined
-                  >
-                    {{ student.account.name }}
+                  <v-chip small color="primary" outlined class="ml-2">
+                    {{ getStudentsInClass(selectedClass)[0].account.name }}
                   </v-chip>
-                </div>
-              </template>
+                </template>
+                <template v-else>
+                  <div class="mt-2">
+                    <v-chip
+                      v-for="(student, index) in getStudentsInClass(
+                        selectedClass
+                      )"
+                      :key="index"
+                      class="ma-1"
+                      small
+                      color="primary"
+                      outlined
+                    >
+                      {{ student.account.name }}
+                    </v-chip>
+                  </div>
+                </template>
               </v-col>
               <v-col cols="12" class="d-flex align-center">
                 <v-icon color="primary">mdi-tag</v-icon>
@@ -1021,11 +1023,11 @@ export default {
 
     getStudentsInClass(selectedClass) {
       if (!selectedClass) return [];
-      
+
       const students = this.classStudents[selectedClass.id];
       if (!students || students.length === 0) return [];
-      
-      return students.filter(student => student.account?.name);
+
+      return students.filter((student) => student.account?.name);
     },
 
     async fetchStudentsForClass(classId) {
