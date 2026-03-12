@@ -699,14 +699,14 @@ export default {
   watch: {
     selectedClass: {
       immediate: true,
-      handler(newClass) {
+      async handler(newClass) {
         // Update form input
         this.formInput.title = newClass?.name;
         this.formInput.link = newClass?.link;
-
-        // Fetch students when class is selected
+        
+        // Fetch students when class is selected and wait for data
         if (newClass && newClass.id) {
-          this.fetchStudentsForClass(newClass.id);
+          await this.fetchStudentsForClass(newClass.id);
         }
       },
     },
@@ -1037,6 +1037,9 @@ export default {
         const { data } = await this.axios.get(`/classes/${classId}`);
         console.log("Fetched students for class:", classId, data.classStudent);
         this.classStudents[classId] = data.classStudent || [];
+        
+        // Force Vue to re-render the component
+        this.$forceUpdate();
       } catch (error) {
         console.error("Error fetching students for class:", error);
       }
