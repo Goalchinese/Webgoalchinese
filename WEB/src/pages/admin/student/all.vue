@@ -84,8 +84,8 @@
             {{ item.pointStructure?.pointAfterUpdate || 0 }}
           </template>
 
-          <template #[`item.classNo`]="{ item }">
-            {{ item.classStudent?.[0]?.class?.no || "N/A" }}
+          <template #[`item.className`]="{ item }">
+            {{ item.classStudent?.[0]?.class?.name || "N/A" }}
           </template>
 
           <template #item.action="{ item }">
@@ -155,7 +155,7 @@ export default {
         { value: "points", text: "Points", width: "7%" },
         { value: "studentType.name", text: "Student Type", width: "12%" },
         { value: "classType.name", text: "Class Type", width: "10%" },
-        { value: "classNo", text: "Class No.", width: "7%" },
+        { value: "className", text: "Class", width: "7%" },
         { value: "age", text: "Age", width: "5%" },
         { value: "gender", text: "Gender", width: "7%" },
         { value: "action", text: "Action", width: "7%" },
