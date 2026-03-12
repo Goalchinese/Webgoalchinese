@@ -170,6 +170,7 @@ exports.findAll = async (req, res) => {
         {
           model: ClassStudent,
           as: "classStudent",
+          required: false,
           include: [
             {
               model: Class,
