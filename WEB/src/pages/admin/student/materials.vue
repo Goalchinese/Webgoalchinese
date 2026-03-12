@@ -141,7 +141,9 @@
           color="primary"
           class="text-none"
           @click="update"
-          :disabled="!selectedStudent.length || !selectedMaterials.length || isLoading"
+          :disabled="
+            !selectedStudent.length || !selectedMaterials.length || isLoading
+          "
           :loading="isLoading"
           v-if="userInfo?.role !== 'user' || permission?.edit"
         >
