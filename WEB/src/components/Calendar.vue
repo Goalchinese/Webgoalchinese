@@ -490,12 +490,17 @@
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
                 <!-- Debug: Show raw data -->
-                <div v-if="selectedClass" style="font-size: 10px; color: grey;">
+                <div v-if="selectedClass" style="font-size: 10px; color: grey">
                   Debug: {{ JSON.stringify(selectedClass.classStudent) }}
                 </div>
 
                 <!-- Always show students if available -->
-                <template v-if="selectedClass.classStudent && selectedClass.classStudent.length > 0">
+                <template
+                  v-if="
+                    selectedClass.classStudent &&
+                    selectedClass.classStudent.length > 0
+                  "
+                >
                   <div class="mt-2">
                     <v-chip
                       v-for="(student, index) in selectedClass.classStudent"
@@ -510,7 +515,7 @@
                   </div>
                 </template>
                 <template v-else>
-                  <span style="color: grey;">No students in this class</span>
+                  <span style="color: grey">No students in this class</span>
                 </template>
               </v-col>
               <v-col cols="12" class="d-flex align-center">
@@ -706,18 +711,26 @@ export default {
         // Update form input
         this.formInput.title = newClass?.name;
         this.formInput.link = newClass?.link;
-        
+
         // Fetch students when class is selected and store directly in selectedClass
         if (newClass && newClass.id) {
           try {
             const { data } = await this.axios.get(`/classes/${newClass.id}`);
-            console.log("Fetched students for class:", newClass.id, data.classStudent);
-            
+            console.log(
+              "Fetched students for class:",
+              newClass.id,
+              data.classStudent
+            );
+
             // Store students directly in selectedClass for easy access
-            this.$set(this.selectedClass, 'classStudent', data.classStudent || []);
+            this.$set(
+              this.selectedClass,
+              "classStudent",
+              data.classStudent || []
+            );
           } catch (error) {
             console.error("Error fetching students for class:", error);
-            this.$set(this.selectedClass, 'classStudent', []);
+            this.$set(this.selectedClass, "classStudent", []);
           }
         }
       },
@@ -1039,7 +1052,7 @@ export default {
       const students = this.classStudents[selectedClass.id];
       console.log("getStudentsInClass called:", selectedClass.id, students);
       console.log("classStudents cache:", this.classStudents);
-      
+
       if (!students || students.length === 0) return [];
 
       return students.filter((student) => student.account?.name);
@@ -1051,7 +1064,7 @@ export default {
       try {
         const { data } = await this.axios.get(`/classes/${classId}`);
         console.log("Fetched students for class:", classId, data.classStudent);
-        
+
         // Store the data and also return it directly
         this.classStudents[classId] = data.classStudent || [];
         return data.classStudent || [];
