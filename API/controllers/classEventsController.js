@@ -127,6 +127,35 @@ exports.findAll = async (req, res) => {
         "endDate",
         "updateBy",
       ],
+      include: [
+        {
+          model: Class,
+          as: "class",
+          include: [
+            {
+              model: Account,
+              as: "teacher",
+              attributes: ["id", "name", "username"],
+            },
+            {
+              model: ClassStudent,
+              as: "classStudent",
+              include: [
+                {
+                  model: Account,
+                  as: "account",
+                  attributes: ["id", "name", "username"],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          model: Account,
+          as: "updatedBy",
+          attributes: ["id", "name", "username"],
+        },
+      ],
       order: [["startDate", "ASC"]],
     });
 
