@@ -48,8 +48,12 @@
           :headers="headers"
           :filter-keys="['title', 'category', 'type']"
           :items="items"
+          :loading="isLoading"
+          :server-items-length="pagination.total"
+          :options.sync="pagination"
           show-select
           mobile-breakpoint="0"
+          @update:options="updatePagination"
         >
           <template #item.name="{ item }">
             <div class="d-flex align-center">
@@ -152,6 +156,13 @@ export default {
         { value: "action", text: "Action" },
       ],
       items: [],
+      isLoading: false,
+      pagination: {
+        page: 1,
+        itemsPerPage: 10,
+        total: 0,
+        totalPages: 0,
+      },
     };
   },
   computed: {
@@ -172,17 +183,31 @@ export default {
   },
   methods: {
     async fetchData() {
+      this.isLoading = true;
       try {
-        const { data } = await this.axios.get(
-          `/account?role=teacher${this.search ? `&search=${this.search}` : ""}`
-        );
-        this.items = data || [];
+        const params = {
+          role: "teacher",
+          page: this.pagination.page,
+          limit: this.pagination.itemsPerPage,
+        };
+        
+        if (this.search) {
+          params.search = this.search;
+        }
+
+        const { data } = await this.axios.get("/account", { params });
+        
+        this.items = data.data || [];
+        this.pagination.total = data.total || 0;
+        this.pagination.totalPages = data.totalPages || 0;
       } catch (error) {
         this.$swal.fire({
           title: error.response.data.error,
           text: error.response.data.details,
           icon: "error",
         });
+      } finally {
+        this.isLoading = false;
       }
     },
     async deleteData(id) {
@@ -208,6 +233,11 @@ export default {
           icon: "error",
         });
       }
+    },
+    updatePagination(options) {
+      this.pagination.page = options.page;
+      this.pagination.itemsPerPage = options.itemsPerPage;
+      this.fetchData();
     },
   },
 };
