@@ -1035,6 +1035,7 @@ export default {
 
       try {
         const { data } = await this.axios.get(`/classes/${classId}`);
+        console.log("Fetched students for class:", classId, data.classStudent);
         this.classStudents[classId] = data.classStudent || [];
       } catch (error) {
         console.error("Error fetching students for class:", error);
