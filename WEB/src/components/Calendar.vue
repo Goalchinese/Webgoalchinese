@@ -489,46 +489,25 @@
 
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
-                <!-- Show loading state while fetching -->
-                <template v-if="loadingStudents">
-                  <v-chip small color="grey" outlined class="ml-2">
-                    <v-progress-circular
-                      indeterminate
-                      size="12"
-                      width="2"
-                      class="mr-2"
-                    ></v-progress-circular>
-                    Loading students...
-                  </v-chip>
-                </template>
-                <!-- Show single student -->
-                <template
-                  v-else-if="getStudentsInClass(selectedClass).length === 1"
-                >
+                <template v-if="selectedClass?.classStudent?.length === 1">
                   <v-chip small color="primary" outlined class="ml-2">
-                    {{ getStudentsInClass(selectedClass)[0].account.name }}
+                    {{ selectedClass.classStudent[0].account.name }}
                   </v-chip>
                 </template>
-                <!-- Show multiple students -->
-                <template
-                  v-else-if="getStudentsInClass(selectedClass).length > 1"
-                >
-                  <div class="mt-2">
-                    <v-chip
-                      v-for="(student, index) in getStudentsInClass(
-                        selectedClass
-                      )"
-                      :key="index"
-                      class="ma-1"
-                      small
-                      color="primary"
-                      outlined
-                    >
-                      {{ student.account.name }}
-                    </v-chip>
-                  </div>
+
+                <template v-else-if="selectedClass?.classStudent?.length > 1">
+                  <v-chip
+                    v-for="student in selectedClass.classStudent"
+                    :key="student.id"
+                    small
+                    color="primary"
+                    outlined
+                    class="ma-1"
+                  >
+                    {{ student.account.name }}
+                  </v-chip>
                 </template>
-                <!-- Show no students when not loading and no data -->
+
                 <template v-else>
                   <span style="color: grey">No students in this class</span>
                 </template>
@@ -767,7 +746,32 @@ export default {
       try {
         // Get all classes without pagination for dropdown
         const { data: dataClass } = await this.axios.get(`/classes?limit=1000`);
-        this.itemsOptions.class = dataClass.data || dataClass;
+
+        // Pre-fetch students for all classes
+        const classesWithStudents = await Promise.all(
+          dataClass.data.map(async (classItem) => {
+            try {
+              const { data: classDetail } = await this.axios.get(
+                `/classes/${classItem.id}`
+              );
+              return {
+                ...classItem,
+                classStudent: classDetail.classStudent || [],
+              };
+            } catch (error) {
+              console.error(
+                `Error fetching students for class ${classItem.id}:`,
+                error
+              );
+              return {
+                ...classItem,
+                classStudent: [],
+              };
+            }
+          })
+        );
+
+        this.itemsOptions.class = classesWithStudents;
 
         const { data: dataBranch } = await this.axios.get(`/branch`);
         this.itemsOptions.branch = dataBranch;
