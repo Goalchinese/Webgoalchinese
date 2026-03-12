@@ -32,10 +32,10 @@ const Account = sequelize.define(
       type: DataTypes.STRING,
     },
     scoreForKids: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
     },
     scoreForAdult: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
     },
     teacherTypeID: {
       type: DataTypes.INTEGER,
