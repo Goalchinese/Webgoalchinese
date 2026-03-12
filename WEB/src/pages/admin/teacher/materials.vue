@@ -258,13 +258,13 @@ export default {
           page: this.paginationTeachers.page,
           limit: this.paginationTeachers.itemsPerPage,
         };
-        
+
         if (this.search) {
           params.search = this.search;
         }
 
         const { data } = await this.axios.get("/account", { params });
-        
+
         this.items = data.data || [];
         this.paginationTeachers.total = data.total || 0;
         this.paginationTeachers.totalPages = data.totalPages || 0;
@@ -286,13 +286,13 @@ export default {
           page: this.paginationMaterials.page,
           limit: this.paginationMaterials.itemsPerPage,
         };
-        
+
         if (this.searchMaterials) {
           params.search = this.searchMaterials;
         }
 
         const { data } = await this.axios.get("/materials", { params });
-        
+
         this.itemsMaterials = data.data || [];
         this.paginationMaterials.total = data.total || 0;
         this.paginationMaterials.totalPages = data.totalPages || 0;
