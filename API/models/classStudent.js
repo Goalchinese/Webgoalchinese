@@ -27,7 +27,10 @@ ClassStudent.associate = (models) => {
     foreignKey: "accountID",
     as: "account",
   });
-  // ClassStudent.belongsTo(models.Class, { foreignKey: "classID" });
+  ClassStudent.belongsTo(models.Class, {
+    foreignKey: "classID",
+    as: "class",
+  });
 };
 
 module.exports = ClassStudent;

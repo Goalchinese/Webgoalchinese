@@ -148,6 +148,11 @@ Account.associate = (models) => {
     onDelete: "cascade",
     hooks: true,
   });
+  Account.hasMany(models.ClassStudent, {
+    foreignKey: "accountID",
+    as: "classStudent",
+    onDelete: "cascade",
+  });
 };
 
 module.exports = Account;

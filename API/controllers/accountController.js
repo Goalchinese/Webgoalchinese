@@ -15,6 +15,8 @@ const {
   ClassType,
   Branch,
   PointStructure,
+  ClassStudent,
+  Class,
 } = require("../models"); // Ensure correct path to your models
 const { validationResult } = require("express-validator");
 
@@ -164,6 +166,18 @@ exports.findAll = async (req, res) => {
           model: PointStructure,
           as: "pointStructure",
           order: [["updateDate", "DESC"]],
+        },
+        {
+          model: ClassStudent,
+          as: "classStudent",
+          required: false,
+          include: [
+            {
+              model: Class,
+              as: "class",
+              attributes: ["id", "no", "name"],
+            },
+          ],
         },
       ],
     });
