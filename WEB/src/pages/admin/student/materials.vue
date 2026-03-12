@@ -141,7 +141,8 @@
           color="primary"
           class="text-none"
           @click="update"
-          :disabled="!selectedStudent.length || !selectedMaterials.length"
+          :disabled="!selectedStudent.length || !selectedMaterials.length || isLoading"
+          :loading="isLoading"
           v-if="userInfo?.role !== 'user' || permission?.edit"
         >
           <v-icon left> mdi-content-save </v-icon>
@@ -206,6 +207,7 @@ export default {
       itemsMaterials: [],
       selectedStudent: [],
       selectedMaterials: [],
+      isLoading: false,
     };
   },
   computed: {
@@ -261,6 +263,7 @@ export default {
       }
     },
     async update() {
+      this.isLoading = true;
       try {
         let body = {
           accountID: this.selectedStudent.map((item) => item.id),
@@ -275,6 +278,8 @@ export default {
           text: error.response.data.details,
           icon: "error",
         });
+      } finally {
+        this.isLoading = false;
       }
     },
     async clearMaterials() {

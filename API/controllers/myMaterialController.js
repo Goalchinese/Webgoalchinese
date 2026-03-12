@@ -13,20 +13,21 @@ exports.create = async (req, res) => {
         .json({ error: "Both accountID and materialID are required" });
     }
 
-    for (let i = 0; i < accountID.length; i++) {
-      for (let j = 0; j < materials.length; j++) {
-        await MyMaterial.findOrCreate({
-          where: {
-            accountID: accountID[i],
-            materialID: materials[j],
-          },
-          defaults: {
-            accountID: accountID[i],
-            materialID: materials[j],
-          },
+    // Create all possible combinations at once
+    const combinations = [];
+    for (const accountId of accountID) {
+      for (const materialId of materials) {
+        combinations.push({
+          accountID: accountId,
+          materialID: materialId,
         });
       }
     }
+
+    // Use bulkCreate with ignoreDuplicates to prevent duplicates
+    await MyMaterial.bulkCreate(combinations, {
+      ignoreDuplicates: true,
+    });
 
     res.status(201).json({
       message: "My Material created successfully",
