@@ -232,9 +232,12 @@
                   hide-details="auto"
                   placeholder="Enter Score"
                   :rules="[
-                    (v) =>
-                      (v !== undefined && v !== null && v !== '') ||
-                      'Score is required',
+                    (v) => {
+                      if (!v && v !== 0) return 'Score is required';
+                      if (isNaN(v)) return 'Please enter a number';
+                      if (v < 0 || v > 9) return 'Score must be between 0 and 9';
+                      return true;
+                    },
                   ]"
                   :readonly="flagView"
                 />
@@ -251,9 +254,12 @@
                   hide-details="auto"
                   placeholder="Enter Score"
                   :rules="[
-                    (v) =>
-                      (v !== undefined && v !== null && v !== '') ||
-                      'Score is required',
+                    (v) => {
+                      if (!v && v !== 0) return 'Score is required';
+                      if (isNaN(v)) return 'Please enter a number';
+                      if (v < 0 || v > 9) return 'Score must be between 0 and 9';
+                      return true;
+                    },
                   ]"
                   :readonly="flagView"
                 />
