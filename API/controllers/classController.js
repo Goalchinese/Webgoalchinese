@@ -67,7 +67,9 @@ exports.create = async (req, res, next) => {
 // Retrieve all Classes
 exports.findAll = async (req, res) => {
   try {
-    const { search } = req.query;
+    const { search, page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
+    
     let where = {};
     if (search) {
       where = {
@@ -86,30 +88,35 @@ exports.findAll = async (req, res) => {
       };
     }
 
+    // Get total count for pagination
+    const total = await Class.count({ where });
+
     const classes = await Class.findAll({
       where,
       order: [
         ["status", "ASC"],
         ["no", "ASC"],
-        ["attendance", "id", "ASC"],
-        ["classStudy", "id", "ASC"],
       ],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
       include: [
         { model: ClassStudy, as: "classStudy" },
-        {
-          model: ClassStudent,
-          as: "classStudent",
-          include: [{ model: Account, as: "account" }],
+        { model: Account, as: "teacher", attributes: ["id", "name"] },
+        { 
+          model: Attendance, as: "attendance", 
+          attributes: ["id", "classID"],
+          required: false 
         },
-        { model: ClassType, as: "classType" },
-        { model: Account, as: "teacher" },
-        { model: Account, as: "updatedBy" },
-        { model: Attendance, as: "attendance" },
-        { model: Branch, as: "branch" },
-        { model: Currency, as: "currency" },
       ],
     });
-    res.status(200).json(classes);
+
+    res.status(200).json({
+      data: classes,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
     res
       .status(500)
