@@ -180,13 +180,13 @@ export default {
           page: this.pagination.page,
           limit: this.pagination.itemsPerPage,
         };
-        
+
         if (this.search) {
           params.search = this.search;
         }
 
         const { data } = await this.axios.get("/materials", { params });
-        
+
         this.itemsMaterials = data.data || [];
         this.pagination.total = data.total || 0;
         this.pagination.totalPages = data.totalPages || 0;
