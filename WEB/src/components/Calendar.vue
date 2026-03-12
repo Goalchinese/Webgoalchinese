@@ -348,7 +348,7 @@
                 <v-autocomplete
                   :items="itemsOptions.class"
                   v-model="selectedClass"
-                  item-text="name"
+                  :item-text="(item) => `${item.no} - ${item.name}`"
                   return-object
                   placeholder="Select class"
                   dense
