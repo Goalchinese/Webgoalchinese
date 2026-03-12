@@ -271,23 +271,35 @@
 
               <span>{{ selectedEvent?.class?.teacher?.name }}</span>
             </v-col>
-            <v-col cols="12">
+            <v-col cols="12" class="d-flex flex-wrap align-center">
               <v-icon color="primary">mdi-timer-edit-outline</v-icon>
 
               <span class="subtitle-2 mx-2">Student in class :</span>
 
-              <div class="mt-2">
+              <template v-if="selectedEvent?.class?.classStudent?.length === 1">
                 <v-chip
-                  v-for="(student, index) in selectedEvent?.class?.classStudent"
-                  :key="index"
-                  class="ma-1"
                   small
                   color="primary"
                   outlined
+                  class="ml-2"
                 >
-                  {{ student.account.name }}
+                  {{ selectedEvent.class.classStudent[0].account.name }}
                 </v-chip>
-              </div>
+              </template>
+              <template v-else>
+                <div class="mt-2">
+                  <v-chip
+                    v-for="(student, index) in selectedEvent?.class?.classStudent"
+                    :key="index"
+                    class="ma-1"
+                    small
+                    color="primary"
+                    outlined
+                  >
+                    {{ student.account.name }}
+                  </v-chip>
+                </div>
+              </template>
             </v-col>
           </v-row>
 
