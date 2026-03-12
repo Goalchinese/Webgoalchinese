@@ -135,7 +135,7 @@ exports.findAll = async (req, res) => {
             {
               model: Account,
               as: "teacher",
-              attributes: ["id", "name", "username"],
+              attributes: ["id", "name"],
             },
             {
               model: ClassStudent,
@@ -144,7 +144,7 @@ exports.findAll = async (req, res) => {
                 {
                   model: Account,
                   as: "account",
-                  attributes: ["id", "name", "username"],
+                  attributes: ["id", "name"],
                 },
               ],
             },
@@ -153,7 +153,7 @@ exports.findAll = async (req, res) => {
         {
           model: Account,
           as: "updatedBy",
-          attributes: ["id", "name", "username"],
+          attributes: ["id", "name"],
         },
       ],
       order: [["startDate", "ASC"]],
