@@ -2,8 +2,8 @@
 builder = "nixpacks"
 
 [deploy]
-healthcheckPath = "/api"
-healthcheckTimeout = 300
+# healthcheckPath = "/api"
+# healthcheckTimeout = 300
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
 
@@ -14,8 +14,8 @@ source = "API"
 builder = "nixpacks"
 [services.deploy]
 startCommand = "npm start"
-healthcheckPath = "/api"
-healthcheckTimeout = 300
+# healthcheckPath = "/api"
+# healthcheckTimeout = 300
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
 
@@ -26,7 +26,7 @@ source = "WEB"
 builder = "nixpacks"
 [services.deploy]
 startCommand = "npm run build && npm run serve"
-healthcheckPath = "/"
-healthcheckTimeout = 300
+# healthcheckPath = "/"
+# healthcheckTimeout = 300
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
