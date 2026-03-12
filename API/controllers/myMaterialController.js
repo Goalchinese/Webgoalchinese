@@ -140,8 +140,9 @@ exports.getMaterialsByAccountId = async (req, res) => {
       },
     });
 
+    // Return empty array instead of 404 for library materials
     if (!myMaterials.length) {
-      return res.status(404).json({ error: "My Material not found" });
+      return res.status(200).json([]);
     }
 
     res.status(200).json(myMaterials);
