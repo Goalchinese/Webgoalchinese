@@ -84,10 +84,10 @@
             {{ item.pointStructure?.pointAfterUpdate || 0 }}
           </template>
 
-          <template #[`item.className`]="{ item }">
+          <template #[`item.classNo`]="{ item }">
             {{ 
               (() => {
-                const classData = item.classStudent?.[0]?.class?.name;
+                const classData = item.classStudent?.[0]?.class?.no;
                 console.log('Student class data:', item.id, item.name, classData, item.classStudent);
                 return classData || "N/A";
               })()
@@ -161,7 +161,7 @@ export default {
         { value: "points", text: "Points", width: "7%" },
         { value: "studentType.name", text: "Student Type", width: "12%" },
         { value: "classType.name", text: "Class Type", width: "10%" },
-        { value: "className", text: "Class", width: "7%" },
+        { value: "classNo", text: "Class No.", width: "7%" },
         { value: "age", text: "Age", width: "5%" },
         { value: "gender", text: "Gender", width: "7%" },
         { value: "action", text: "Action", width: "7%" },
