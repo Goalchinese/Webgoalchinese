@@ -235,7 +235,8 @@
                     (v) => {
                       if (!v && v !== 0) return 'Score is required';
                       if (isNaN(v)) return 'Please enter a number';
-                      if (v < 0 || v > 9) return 'Score must be between 0 and 9';
+                      if (v < 0 || v > 9)
+                        return 'Score must be between 0 and 9';
                       return true;
                     },
                   ]"
@@ -257,7 +258,8 @@
                     (v) => {
                       if (!v && v !== 0) return 'Score is required';
                       if (isNaN(v)) return 'Please enter a number';
-                      if (v < 0 || v > 9) return 'Score must be between 0 and 9';
+                      if (v < 0 || v > 9)
+                        return 'Score must be between 0 and 9';
                       return true;
                     },
                   ]"
