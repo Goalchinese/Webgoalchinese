@@ -85,10 +85,16 @@
           </template>
 
           <template #[`item.classNo`]="{ item }">
-            {{ 
+            {{
               (() => {
                 const classData = item.classStudent?.[0]?.class?.no;
-                console.log('Student class data:', item.id, item.name, classData, item.classStudent);
+                console.log(
+                  "Student class data:",
+                  item.id,
+                  item.name,
+                  classData,
+                  item.classStudent
+                );
                 return classData || "N/A";
               })()
             }}
