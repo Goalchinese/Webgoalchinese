@@ -89,7 +89,9 @@ exports.create = async (req, res, next) => {
 // Get all Accounts
 exports.findAll = async (req, res) => {
   try {
-    const { role, search } = req.query;
+    const { role, search, page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
+    
     let where = {};
     let order = [];
 
@@ -116,8 +118,26 @@ exports.findAll = async (req, res) => {
       ];
     }
 
+    // Get total count for pagination
+    const total = await Account.count({
+      include: [
+        {
+          model: User,
+          as: "user",
+          where: {
+            role: {
+              [Op.in]: role ? role.split(",") : ["user"],
+            },
+            ...where,
+          },
+        },
+      ],
+    });
+
     const accounts = await Account.findAll({
       order,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
       include: [
         {
           model: User,
@@ -147,7 +167,14 @@ exports.findAll = async (req, res) => {
         },
       ],
     });
-    res.status(200).json(accounts);
+
+    res.status(200).json({
+      data: accounts,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
