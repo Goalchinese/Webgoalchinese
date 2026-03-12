@@ -105,7 +105,9 @@ exports.update = async (req, res, next) => {
 // Get all Materials
 exports.findAll = async (req, res, next) => {
   try {
-    const { materialFor, search } = req.query;
+    const { materialFor, search, page = 1, limit = 10 } = req.query;
+    const offset = (page - 1) * limit;
+    
     let where = {};
     if (materialFor) {
       where = {
@@ -122,9 +124,22 @@ exports.findAll = async (req, res, next) => {
       };
     }
 
+    // Get total count for pagination
+    const total = await Materials.count({
+      where,
+      include: materialFor ? [
+        {
+          association: "materialFor",
+          attributes: ["id", "name"],
+        },
+      ] : [],
+    });
+
     const materials = await Materials.findAll({
       where,
       order: [["no", "ASC"]],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
       include: [
         {
           association: "materialCategory",
@@ -140,7 +155,14 @@ exports.findAll = async (req, res, next) => {
         },
       ],
     });
-    res.status(200).json(materials);
+
+    res.status(200).json({
+      data: materials,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
     next(error); // Pass the error to the centralized error handler
   }
