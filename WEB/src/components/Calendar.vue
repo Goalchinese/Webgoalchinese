@@ -681,9 +681,13 @@ export default {
     selectedClass: {
       immediate: true,
       handler(newClass) {
+        // Fetch students when class is selected
         if (newClass && newClass.id) {
           this.fetchStudentsForClass(newClass.id);
         }
+        // Update form input
+        this.formInput.title = newClass?.name;
+        this.formInput.link = newClass?.link;
       },
     },
     eventsItems: {
@@ -695,13 +699,6 @@ export default {
           "events"
         );
         if (val) this.getEvents();
-      },
-    },
-    selectedClass: {
-      immediate: true,
-      handler(val) {
-        this.formInput.title = val?.name;
-        this.formInput.link = val?.link;
       },
     },
     branch(val) {
@@ -1006,16 +1003,21 @@ export default {
 
     getStudentsInClass(selectedClass) {
       if (!selectedClass) return "No class selected";
-      
+
       const students = this.classStudents[selectedClass.id];
       if (!students || students.length === 0) return "No students";
-      
-      return students.map(student => student.account?.name).filter(Boolean).join(", ") || "No students";
+
+      return (
+        students
+          .map((student) => student.account?.name)
+          .filter(Boolean)
+          .join(", ") || "No students"
+      );
     },
 
     async fetchStudentsForClass(classId) {
       if (!classId || this.classStudents[classId]) return;
-      
+
       try {
         const { data } = await this.axios.get(`/classes/${classId}`);
         this.classStudents[classId] = data.classStudent || [];
