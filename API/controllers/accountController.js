@@ -152,21 +152,25 @@ exports.findAll = async (req, res) => {
         model: StudentType,
         as: "studentType",
         attributes: ["name"],
+        required: false,
       },
       {
         model: ClassType,
         as: "classType",
         attributes: ["name"],
-      },
-      {
-        model: PointStructure,
-        as: "pointStructure",
-        order: [["updateDate", "DESC"]],
+        required: false,
       },
     ];
 
-    // Only include ClassStudent for students to avoid performance issues
+    // Only include ClassStudent and PointStructure for students to avoid performance issues
     if (role === "student") {
+      includeOptions.push({
+        model: PointStructure,
+        as: "pointStructure",
+        order: [["updateDate", "DESC"]],
+        required: false,
+      });
+      
       includeOptions.push({
         model: ClassStudent,
         as: "classStudent",
