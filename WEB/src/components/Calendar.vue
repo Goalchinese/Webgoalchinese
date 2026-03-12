@@ -719,8 +719,9 @@ export default {
   methods: {
     async fetchOption() {
       try {
-        const { data: dataClass } = await this.axios.get(`/classes`);
-        this.itemsOptions.class = dataClass;
+        // Get all classes without pagination for dropdown
+        const { data: dataClass } = await this.axios.get(`/classes?limit=1000`);
+        this.itemsOptions.class = dataClass.data || dataClass;
 
         const { data: dataBranch } = await this.axios.get(`/branch`);
         this.itemsOptions.branch = dataBranch;
