@@ -48,8 +48,12 @@
           :headers="headers"
           :filter-keys="['title', 'category', 'type']"
           :items="items"
+          :loading="isLoadingTeachers"
+          :server-items-length="paginationTeachers.total"
+          :options.sync="paginationTeachers"
           mobile-breakpoint="0"
           show-select
+          @update:options="updatePaginationTeachers"
         >
           <template #item.name="{ item }">
             <div class="d-flex align-center">
@@ -108,8 +112,12 @@
           :headers="headersMaterials"
           :filter-keys="['title', 'category', 'type']"
           :items="itemsMaterials"
+          :loading="isLoadingMaterials"
+          :server-items-length="paginationMaterials.total"
+          :options.sync="paginationMaterials"
           show-select
           mobile-breakpoint="0"
+          @update:options="updatePaginationMaterials"
         >
           <template #item.photo="{ item }">
             <v-avatar size="64" rounded color="grey lighten-4" class="my-2">
@@ -204,6 +212,20 @@ export default {
       itemsMaterials: [],
       selectedTeacher: [],
       selectedMaterials: [],
+      isLoadingTeachers: false,
+      isLoadingMaterials: false,
+      paginationTeachers: {
+        page: 1,
+        itemsPerPage: 10,
+        total: 0,
+        totalPages: 0,
+      },
+      paginationMaterials: {
+        page: 1,
+        itemsPerPage: 10,
+        total: 0,
+        totalPages: 0,
+      },
     };
   },
   computed: {
@@ -229,33 +251,59 @@ export default {
   },
   methods: {
     async fetchDataTeacher() {
+      this.isLoadingTeachers = true;
       try {
-        const { data } = await this.axios.get(
-          `/account?role=teacher${this.search ? `&search=${this.search}` : ""}`
-        );
-        this.items = data || [];
+        const params = {
+          role: "teacher",
+          page: this.paginationTeachers.page,
+          limit: this.paginationTeachers.itemsPerPage,
+        };
+        
+        if (this.search) {
+          params.search = this.search;
+        }
+
+        const { data } = await this.axios.get("/account", { params });
+        
+        this.items = data.data || [];
+        this.paginationTeachers.total = data.total || 0;
+        this.paginationTeachers.totalPages = data.totalPages || 0;
       } catch (error) {
         this.$swal.fire({
           title: error.response.data.error,
           text: error.response.data.details,
           icon: "error",
         });
+      } finally {
+        this.isLoadingTeachers = false;
       }
     },
     async fetchDataMaterials() {
+      this.isLoadingMaterials = true;
       try {
-        const { data } = await this.axios.get(
-          `/materials?materialFor=teacher${
-            this.searchMaterials ? `&search=${this.searchMaterials}` : ""
-          }`
-        );
-        this.itemsMaterials = data;
+        const params = {
+          materialFor: "teacher",
+          page: this.paginationMaterials.page,
+          limit: this.paginationMaterials.itemsPerPage,
+        };
+        
+        if (this.searchMaterials) {
+          params.search = this.searchMaterials;
+        }
+
+        const { data } = await this.axios.get("/materials", { params });
+        
+        this.itemsMaterials = data.data || [];
+        this.paginationMaterials.total = data.total || 0;
+        this.paginationMaterials.totalPages = data.totalPages || 0;
       } catch (error) {
         this.$swal.fire({
           title: error.response.data.error,
           text: error.response.data.details,
           icon: "error",
         });
+      } finally {
+        this.isLoadingMaterials = false;
       }
     },
     async update() {
@@ -300,6 +348,16 @@ export default {
           icon: "error",
         });
       }
+    },
+    updatePaginationTeachers(options) {
+      this.paginationTeachers.page = options.page;
+      this.paginationTeachers.itemsPerPage = options.itemsPerPage;
+      this.fetchDataTeacher();
+    },
+    updatePaginationMaterials(options) {
+      this.paginationMaterials.page = options.page;
+      this.paginationMaterials.itemsPerPage = options.itemsPerPage;
+      this.fetchDataMaterials();
     },
   },
 };
