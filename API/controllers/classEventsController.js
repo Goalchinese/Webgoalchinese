@@ -131,6 +131,7 @@ exports.findAll = async (req, res) => {
         {
           model: Class,
           as: "class",
+          attributes: ["id", "name", "no", "studyPlatform", "link"],
           include: [
             {
               model: Account,
