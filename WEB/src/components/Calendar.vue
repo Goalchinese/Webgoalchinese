@@ -507,7 +507,7 @@
                   </div>
                 </template>
                 <template v-else>
-                  <span style="color: grey;">No students in this class</span>
+                  <span style="color: grey">No students in this class</span>
                 </template>
               </v-col>
               <v-col cols="12" class="d-flex align-center">
@@ -703,7 +703,7 @@ export default {
         // Update form input
         this.formInput.title = newClass?.name;
         this.formInput.link = newClass?.link;
-        
+
         // Fetch students when class is selected
         if (newClass && newClass.id) {
           this.fetchStudentsForClass(newClass.id);
