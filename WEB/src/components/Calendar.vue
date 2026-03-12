@@ -1025,16 +1025,18 @@ export default {
       if (!selectedClass) return [];
 
       const students = this.classStudents[selectedClass.id];
+      console.log("getStudentsInClass called:", selectedClass.id, students);
       if (!students || students.length === 0) return [];
 
       return students.filter((student) => student.account?.name);
     },
 
     async fetchStudentsForClass(classId) {
-      if (!classId || this.classStudents[classId]) return;
+      if (!classId) return;
 
       try {
         const { data } = await this.axios.get(`/classes/${classId}`);
+        console.log("Fetched students for class:", classId, data.classStudent);
         this.classStudents[classId] = data.classStudent || [];
       } catch (error) {
         console.error("Error fetching students for class:", error);
