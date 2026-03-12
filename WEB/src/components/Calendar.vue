@@ -271,16 +271,23 @@
 
               <span>{{ selectedEvent?.class?.teacher?.name }}</span>
             </v-col>
-            <v-col cols="12" class="d-flex align-center">
+            <v-col cols="12">
               <v-icon color="primary">mdi-timer-edit-outline</v-icon>
 
               <span class="subtitle-2 mx-2">Student in class :</span>
 
-              <span>{{
-                selectedEvent?.class?.classStudent
-                  .map((it) => it.account.name)
-                  .join(",")
-              }}</span>
+              <div class="mt-2">
+                <v-chip
+                  v-for="(student, index) in selectedEvent?.class?.classStudent"
+                  :key="index"
+                  class="ma-1"
+                  small
+                  color="primary"
+                  outlined
+                >
+                  {{ student.account.name }}
+                </v-chip>
+              </div>
             </v-col>
           </v-row>
 
