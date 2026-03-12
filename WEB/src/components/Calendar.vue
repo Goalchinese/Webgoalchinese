@@ -489,11 +489,7 @@
 
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
-                <span>{{
-                  selectedClass?.classStudent
-                    ?.map((it) => it.account?.name)
-                    ?.join(",")
-                }}</span>
+                <span>{{ getStudentsInClass(selectedClass) }}</span>
               </v-col>
               <v-col cols="12" class="d-flex align-center">
                 <v-icon color="primary">mdi-tag</v-icon>
@@ -674,6 +670,7 @@ export default {
       note: "",
     },
     flagCreate: true,
+    classStudents: {}, // Cache for students by class ID
   }),
   computed: {
     ...mapState(useAppStore, {
@@ -681,6 +678,14 @@ export default {
     }),
   },
   watch: {
+    selectedClass: {
+      immediate: true,
+      handler(newClass) {
+        if (newClass && newClass.id) {
+          this.fetchStudentsForClass(newClass.id);
+        }
+      },
+    },
     eventsItems: {
       immediate: true,
       handler(val) {
@@ -996,6 +1001,26 @@ export default {
           text: error.response.data.details,
           icon: "error",
         });
+      }
+    },
+
+    getStudentsInClass(selectedClass) {
+      if (!selectedClass) return "No class selected";
+      
+      const students = this.classStudents[selectedClass.id];
+      if (!students || students.length === 0) return "No students";
+      
+      return students.map(student => student.account?.name).filter(Boolean).join(", ") || "No students";
+    },
+
+    async fetchStudentsForClass(classId) {
+      if (!classId || this.classStudents[classId]) return;
+      
+      try {
+        const { data } = await this.axios.get(`/classes/${classId}`);
+        this.classStudents[classId] = data.classStudent || [];
+      } catch (error) {
+        console.error("Error fetching students for class:", error);
       }
     },
   },
