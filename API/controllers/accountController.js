@@ -136,50 +136,57 @@ exports.findAll = async (req, res) => {
       ],
     });
 
+    const includeOptions = [
+      {
+        model: User,
+        as: "user",
+        attributes: { exclude: ["password"] },
+        where: {
+          role: {
+            [Op.in]: role ? role.split(",") : ["user"],
+          },
+          ...where,
+        },
+      },
+      {
+        model: StudentType,
+        as: "studentType",
+        attributes: ["name"],
+      },
+      {
+        model: ClassType,
+        as: "classType",
+        attributes: ["name"],
+      },
+      {
+        model: PointStructure,
+        as: "pointStructure",
+        order: [["updateDate", "DESC"]],
+      },
+    ];
+
+    // Only include ClassStudent for students to avoid performance issues
+    if (role === "student") {
+      includeOptions.push({
+        model: ClassStudent,
+        as: "classStudent",
+        required: false,
+        separate: true,
+        include: [
+          {
+            model: Class,
+            as: "class",
+            attributes: ["id", "no", "name"],
+          },
+        ],
+      });
+    }
+
     const accounts = await Account.findAll({
       order,
       limit: parseInt(limit),
       offset: parseInt(offset),
-      include: [
-        {
-          model: User,
-          as: "user",
-          attributes: { exclude: ["password"] },
-          where: {
-            role: {
-              [Op.in]: role ? role.split(",") : ["user"],
-            },
-            ...where,
-          },
-        },
-        {
-          model: StudentType,
-          as: "studentType",
-          attributes: ["name"],
-        },
-        {
-          model: ClassType,
-          as: "classType",
-          attributes: ["name"],
-        },
-        {
-          model: PointStructure,
-          as: "pointStructure",
-          order: [["updateDate", "DESC"]],
-        },
-        {
-          model: ClassStudent,
-          as: "classStudent",
-          required: false,
-          include: [
-            {
-              model: Class,
-              as: "class",
-              attributes: ["id", "no", "name"],
-            },
-          ],
-        },
-      ],
+      include: includeOptions,
     });
 
     res.status(200).json({
