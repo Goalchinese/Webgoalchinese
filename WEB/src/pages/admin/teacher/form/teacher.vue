@@ -231,7 +231,7 @@
                   single-line
                   hide-details="auto"
                   placeholder="Enter Score"
-                  :rules="[(v) => !!v || 'Score is required']"
+                  :rules="[(v) => v !== undefined && v !== null && v !== '' || 'Score is required']"
                   :readonly="flagView"
                 />
               </v-col>
