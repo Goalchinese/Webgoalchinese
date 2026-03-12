@@ -700,14 +700,14 @@ export default {
   watch: {
     selectedClass: {
       immediate: true,
-      handler(newClass) {
+      async handler(newClass) {
         // Update form input
         this.formInput.title = newClass?.name;
         this.formInput.link = newClass?.link;
-
-        // Fetch students when class is selected
+        
+        // Fetch students when class is selected and wait for completion
         if (newClass && newClass.id) {
-          this.fetchStudentsForClass(newClass.id);
+          await this.fetchStudentsForClass(newClass.id);
         }
       },
     },
@@ -1034,18 +1034,13 @@ export default {
     async fetchStudentsForClass(classId) {
       if (!classId) return;
 
-      // Set loading state
-      this.loadingStudents = true;
-
       try {
         const { data } = await this.axios.get(`/classes/${classId}`);
         this.classStudents[classId] = data.classStudent || [];
+        // Force re-render to update UI immediately
+        this.$forceUpdate();
       } catch (error) {
         console.error("Error fetching students for class:", error);
-        this.classStudents[classId] = [];
-      } finally {
-        // Clear loading state
-        this.loadingStudents = false;
       }
     },
   },
