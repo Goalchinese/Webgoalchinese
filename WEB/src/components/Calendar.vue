@@ -489,15 +489,12 @@
 
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
-                <template v-if="selectedClass?.classStudent?.length === 1">
-                  <v-chip small color="primary" outlined class="ml-2">
-                    {{ selectedClass.classStudent[0].account.name }}
-                  </v-chip>
-                </template>
-                <template v-else>
+                <template v-if="getStudentsInClass(selectedClass).length > 0">
                   <div class="mt-2">
                     <v-chip
-                      v-for="(student, index) in selectedClass?.classStudent"
+                      v-for="(student, index) in getStudentsInClass(
+                        selectedClass
+                      )"
                       :key="index"
                       class="ma-1"
                       small
@@ -507,6 +504,10 @@
                       {{ student.account.name }}
                     </v-chip>
                   </div>
+                </template>
+                <!-- Show no students when no data -->
+                <template v-else>
+                  <span style="color: grey;">No students in this class</span>
                 </template>
               </v-col>
               <v-col cols="12" class="d-flex align-center">
@@ -703,8 +704,8 @@ export default {
         // Update form input
         this.formInput.title = newClass?.name;
         this.formInput.link = newClass?.link;
-
-        // Fetch students when class is selected (non-blocking)
+        
+        // Fetch students when class is selected
         if (newClass && newClass.id) {
           this.fetchStudentsForClass(newClass.id);
         }
@@ -743,32 +744,7 @@ export default {
       try {
         // Get all classes without pagination for dropdown
         const { data: dataClass } = await this.axios.get(`/classes?limit=1000`);
-
-        // Pre-fetch students for all classes
-        const classesWithStudents = await Promise.all(
-          dataClass.data.map(async (classItem) => {
-            try {
-              const { data: classDetail } = await this.axios.get(
-                `/classes/${classItem.id}`
-              );
-              return {
-                ...classItem,
-                classStudent: classDetail.classStudent || [],
-              };
-            } catch (error) {
-              console.error(
-                `Error fetching students for class ${classItem.id}:`,
-                error
-              );
-              return {
-                ...classItem,
-                classStudent: [],
-              };
-            }
-          })
-        );
-
-        this.itemsOptions.class = classesWithStudents;
+        this.itemsOptions.class = dataClass.data || dataClass;
 
         const { data: dataBranch } = await this.axios.get(`/branch`);
         this.itemsOptions.branch = dataBranch;
