@@ -490,7 +490,7 @@
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
                 <!-- Debug: Show raw data -->
-                <div v-if="selectedClass" style="font-size: 10px; color: grey;">
+                <div v-if="selectedClass" style="font-size: 10px; color: grey">
                   Debug: {{ JSON.stringify(getStudentsInClass(selectedClass)) }}
                 </div>
 
