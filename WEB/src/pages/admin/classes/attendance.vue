@@ -108,6 +108,7 @@
                 dark
                 :color="resolveStatus(time.status)"
                 @click.stop="showDialog(item.id, time)"
+                style="cursor: pointer"
               >
                 {{ i + 1 }}
               </v-chip>
@@ -367,7 +368,9 @@ export default {
       this.editClassID = classId;
       this.editItem = {
         ...item,
-        studyDate: new Date(item.studyDate).toISOString().substring(0, 10),
+        studyDate: item.studyDate
+          ? new Date(item.studyDate).toISOString().substring(0, 10)
+          : new Date().toISOString().substring(0, 10),
       };
       this.dialog = true;
     },
