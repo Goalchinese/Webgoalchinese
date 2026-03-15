@@ -381,7 +381,7 @@ export default {
         times.push({
           studyDate: new Date().toISOString().substring(0, 10),
           classId: null,
-          status: "",
+          status: "regular",
         });
       }
       return times;
