@@ -376,8 +376,25 @@ export default {
     },
     genarateTimes(item) {
       const times = [];
-      times.push(...item.attendance);
-      for (let i = 0; i < item.registeredTimes - item.attendance.length; i++) {
+
+      // Add existing attendance with default status if missing
+      if (item.attendance && item.attendance.length > 0) {
+        times.push(
+          ...item.attendance.map((att) => ({
+            ...att,
+            status: att.status || "regular", // Default to regular for completed classes
+            studyDate:
+              att.studyDate || new Date().toISOString().substring(0, 10),
+          }))
+        );
+      }
+
+      // Add remaining slots
+      for (
+        let i = 0;
+        i < item.registeredTimes - (item.attendance?.length || 0);
+        i++
+      ) {
         times.push({
           studyDate: new Date().toISOString().substring(0, 10),
           classId: null,
