@@ -310,8 +310,10 @@ export default {
       this.isLoading = true;
       try {
         const { page, itemsPerPage } = this.pagination;
+        // Handle -1 (All) case - use large number instead of -1
+        const limit = itemsPerPage === -1 ? 1000 : itemsPerPage;
         const { data } = await this.axios.get(
-          `/classes?page=${page}&limit=${itemsPerPage}${
+          `/classes?page=${page}&limit=${limit}${
             this.search ? `&search=${this.search}` : ""
           }`
         );

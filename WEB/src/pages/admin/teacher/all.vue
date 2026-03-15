@@ -185,10 +185,15 @@ export default {
     async fetchData() {
       this.isLoading = true;
       try {
+        // Handle -1 (All) case - use large number instead of -1
+        const limit =
+          this.pagination.itemsPerPage === -1
+            ? 1000
+            : this.pagination.itemsPerPage;
         const params = {
           role: "teacher",
           page: this.pagination.page,
-          limit: this.pagination.itemsPerPage,
+          limit: limit,
         };
 
         if (this.search) {
