@@ -358,16 +358,6 @@ export default {
         });
       }
     },
-    updatePaginationStudents(options) {
-      this.paginationStudents.page = options.page;
-      this.paginationStudents.itemsPerPage = options.itemsPerPage;
-      this.fetchDataTeacher();
-    },
-    updatePaginationMaterials(options) {
-      this.paginationMaterials.page = options.page;
-      this.paginationMaterials.itemsPerPage = options.itemsPerPage;
-      this.fetchDataMaterials();
-    },
   },
 };
 </script>

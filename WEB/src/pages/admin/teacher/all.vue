@@ -234,11 +234,6 @@ export default {
         });
       }
     },
-    updatePagination(options) {
-      this.pagination.page = options.page;
-      this.pagination.itemsPerPage = options.itemsPerPage;
-      this.fetchData();
-    },
   },
 };
 </script>
