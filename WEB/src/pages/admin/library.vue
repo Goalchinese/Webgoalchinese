@@ -1,357 +1,160 @@
 <template>
-  <v-container fluid class="pa-0">
-    <!-- Modern Header with Gradient -->
+  <v-container>
     <v-row>
       <v-col cols="12">
-        <v-card
-          class="elevation-6"
-          style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+        <v-sheet
+          rounded="lg"
+          color="info"
+          class="mx-auto d-flex justify-center align-center"
+          height="50"
+          width="100%"
         >
-          <v-card-title class="text-center py-6">
-            <v-icon large color="white" class="mr-3"
-              >mdi-book-open-variant</v-icon
-            >
-            <h3 class="text-h3 white--text font-weight-bold mb-0">
-              Student Library Materials
-            </h3>
-          </v-card-title>
-        </v-card>
+          <h4 class="text-h4 white--text font-weight-bold">
+            Student Library Materials
+          </h4>
+        </v-sheet>
       </v-col>
     </v-row>
 
-    <!-- Search and Actions Section -->
-    <v-row class="mt-4">
+    <v-row>
+      <v-col cols="4">
+        <h5 class="text-h5">
+          <span class="red--text">*</span> Select Students
+        </h5>
+      </v-col>
+      <v-col cols="auto" class="ml-auto">
+        <v-btn
+          color="info"
+          :disabled="!selectedStudent.length"
+          @click="clearMaterials"
+          >Clear Materials Data</v-btn
+        >
+      </v-col>
+      <v-col cols="4">
+        <v-text-field
+          v-model="search"
+          placeholder="Search..."
+          dense
+          hide-details="auto"
+          background-color="grey lighten-4"
+          solo
+          flat
+          clearable
+        />
+      </v-col>
+    </v-row>
+    <v-row dense>
       <v-col cols="12">
-        <v-card class="elevation-2 pa-4">
-          <v-row align="center">
-            <!-- Title Section -->
-            <v-col cols="12" md="3">
-              <div class="d-flex align-center">
-                <v-icon color="primary" class="mr-2">mdi-account-group</v-icon>
-                <h4 class="text-h4 font-weight-bold grey--text text--darken-3">
-                  Select Students
-                </h4>
-                <span class="red--text ml-2">*</span>
+        <v-data-table
+          v-model="selectedStudent"
+          :headers="headers"
+          :filter-keys="['title', 'category', 'type']"
+          :items="items"
+          :loading="isLoadingStudents"
+          :server-items-length="paginationStudents.total"
+          :options.sync="paginationStudents"
+          mobile-breakpoint="0"
+          show-select
+          @update:options="updatePaginationStudents"
+        >
+          <template #item.name="{ item }">
+            <div class="d-flex align-center">
+              <v-avatar
+                size="64"
+                :color="item.photo ? '' : 'grey lighten-4'"
+                :class="item.photo ? '' : 'v-avatar-light-bg primary--text'"
+                :variant="!item.photo ? 'tonal' : undefined"
+                rounded="lg"
+              >
+                <v-img v-if="item.photo" :src="`${baseUrl}${item.photo}`" />
+                <v-img v-else :src="iconStudent" />
+              </v-avatar>
+              <div class="d-flex flex-column ms-3">
+                <span
+                  class="d-block font-weight-medium text-high-emphasis text-truncate"
+                  >{{ item.name }}</span
+                >
               </div>
-            </v-col>
+            </div>
+          </template>
 
-            <!-- Search Section -->
-            <v-col cols="12" md="6">
-              <v-text-field
-                v-model="search"
-                placeholder="Search students by name, admission no..."
-                prepend-inner-icon="mdi-magnify"
-                outlined
-                dense
-                hide-details="auto"
-                clearable
-                class="rounded-lg"
-                background-color="white"
+          <template #[`item.age`]="{ item }">
+            {{ calulateAge(item.dateOfBirth) }}
+          </template>
+          <template #[`item.points`]="{ item }">
+            {{ item.pointStructure?.pointAfterUpdate || 0 }}
+          </template>
+        </v-data-table>
+      </v-col>
+    </v-row>
+
+    <v-row justify="space-between">
+      <v-col cols="4">
+        <h5 class="text-h5">
+          <span class="red--text">*</span> Select Materials
+        </h5>
+      </v-col>
+      <v-col cols="4">
+        <v-text-field
+          v-model="searchMaterials"
+          placeholder="Search..."
+          dense
+          hide-details="auto"
+          background-color="grey lighten-4"
+          solo
+          flat
+          clearable
+        />
+      </v-col>
+    </v-row>
+    <v-row dense>
+      <v-col cols="12">
+        <v-data-table
+          v-model="selectedMaterials"
+          :headers="headersMaterials"
+          :filter-keys="['title', 'category', 'type']"
+          :items="itemsMaterials"
+          :loading="isLoadingMaterials"
+          :server-items-length="paginationMaterials.total"
+          :options.sync="paginationMaterials"
+          mobile-breakpoint="0"
+          show-select
+          @update:options="updatePaginationMaterials"
+        >
+          <template #item.photo="{ item }">
+            <v-avatar size="64" rounded color="grey lighten-4" class="my-2">
+              <v-img
+                height="64"
+                width="64"
+                cover
+                v-if="item.photo"
+                :src="`${baseUrl}${item.photo}`"
               />
-            </v-col>
-
-            <!-- Action Button -->
-            <v-col cols="12" md="3" class="text-end">
-              <v-btn
-                color="error"
-                :disabled="!selectedStudent.length"
-                @click="clearMaterials"
-                large
-                class="rounded-lg elevation-2"
-                :class="{ 'pulse-animation': selectedStudent.length > 0 }"
-              >
-                <v-icon left>mdi-delete-sweep</v-icon>
-                Clear Materials
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-card>
-      </v-col>
-    </v-row>
-    <!-- Students Table Section -->
-    <v-row class="mt-4">
-      <v-col cols="12">
-        <v-card class="elevation-2">
-          <v-card-title class="pa-4">
-            <v-icon color="primary" class="mr-2">mdi-account-school</v-icon>
-            <span class="text-h6 font-weight-bold">Students List</span>
-            <v-spacer></v-spacer>
-            <v-chip
-              :color="selectedStudent.length > 0 ? 'success' : 'grey'"
-              class="font-weight-bold"
-            >
-              {{ selectedStudent.length }} Selected
-            </v-chip>
-          </v-card-title>
-          <v-divider></v-divider>
-          <v-data-table
-            v-model="selectedStudent"
-            :headers="headers"
-            :filter-keys="['title', 'category', 'type']"
-            :items="items"
-            :loading="isLoadingStudents"
-            :server-items-length="paginationStudents.total"
-            :options.sync="paginationStudents"
-            mobile-breakpoint="0"
-            show-select
-            @update:options="updatePaginationStudents"
-            class="elevation-0"
-          >
-            <template #item.name="{ item }">
-              <div class="d-flex align-center">
-                <v-avatar
-                  size="64"
-                  :color="item.photo ? '' : 'grey lighten-4'"
-                  :class="item.photo ? '' : 'v-avatar-light-bg primary--text'"
-                  :variant="!item.photo ? 'tonal' : undefined"
-                  rounded="lg"
-                >
-                  <v-img v-if="item.photo" :src="`${baseUrl}${item.photo}`" />
-                  <v-img v-else :src="iconStudent" />
-                </v-avatar>
-                <div class="d-flex flex-column ms-3">
-                  <span
-                    class="d-block font-weight-medium text-high-emphasis text-truncate"
-                    >{{ item.name }}</span
-                  >
-                </div>
-              </div>
-            </template>
-
-            <template #[`item.age`]="{ item }">
-              {{ calulateAge(item.dateOfBirth) }}
-            </template>
-            <template #[`item.points`]="{ item }">
-              <v-chip
-                :color="
-                  item.pointStructure?.pointAfterUpdate > 0 ? 'success' : 'grey'
-                "
-                small
-                class="font-weight-bold"
-              >
-                {{ item.pointStructure?.pointAfterUpdate || 0 }} pts
-              </v-chip>
-            </template>
-          </v-data-table>
-        </v-card>
+              <v-img v-else :src="iconDocument" />
+            </v-avatar>
+          </template>
+          <template #[`item.date`]="{ item }">
+            {{ new Date(item.createdAt).toLocaleDateString("en-GB") }}
+          </template>
+          <template #[`item.description`]="{ item }">
+            {{ item.description || "N/A" }}
+          </template>
+        </v-data-table>
       </v-col>
     </v-row>
 
-    <!-- Materials Section -->
-    <v-row class="mt-4">
-      <v-col cols="12">
-        <v-card class="elevation-2">
-          <v-card-title class="pa-4">
-            <v-icon color="primary" class="mr-2">mdi-book-multiple</v-icon>
-            <span class="text-h6 font-weight-bold">Library Materials</span>
-            <v-spacer></v-spacer>
-            <v-chip
-              :color="selectedMaterials.length > 0 ? 'success' : 'grey'"
-              class="font-weight-bold"
-            >
-              {{ selectedMaterials.length }} Selected
-            </v-chip>
-          </v-card-title>
-          <v-divider></v-divider>
-          <v-card-text class="pa-4">
-            <v-text-field
-              v-model="searchMaterials"
-              placeholder="Search materials by title, category..."
-              prepend-inner-icon="mdi-magnify"
-              outlined
-              dense
-              hide-details="auto"
-              clearable
-              class="rounded-lg mb-4"
-              background-color="white"
-            />
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-    <!-- Materials Table Section -->
-    <v-row class="mt-2">
-      <v-col cols="12">
-        <v-card class="elevation-2">
-          <v-data-table
-            v-model="selectedMaterials"
-            :headers="headersMaterials"
-            :filter-keys="['title', 'category', 'type']"
-            :items="itemsMaterials"
-            :loading="isLoadingMaterials"
-            :server-items-length="paginationMaterials.total"
-            :options.sync="paginationMaterials"
-            mobile-breakpoint="0"
-            show-select
-            @update:options="updatePaginationMaterials"
-            class="elevation-0"
-          >
-            <template #item.photo="{ item }">
-              <div class="d-flex align-center">
-                <v-avatar size="56" rounded class="my-2 elevation-2">
-                  <!-- Video thumbnail for video files -->
-                  <div
-                    v-if="isVideoFile(item.documentType)"
-                    class="video-thumbnail"
-                  >
-                    <v-img
-                      height="56"
-                      width="56"
-                      cover
-                      v-if="item.photo"
-                      :src="`${baseUrl}${item.photo}`"
-                    />
-                    <div
-                      v-else
-                      class="video-placeholder d-flex align-center justify-center"
-                      style="
-                        background: linear-gradient(
-                          135deg,
-                          #667eea 0%,
-                          #764ba2 100%
-                        );
-                      "
-                    >
-                      <v-icon color="white" size="32">mdi-play-circle</v-icon>
-                    </div>
-                  </div>
-                  <!-- Regular document/image -->
-                  <div v-else>
-                    <v-img
-                      height="56"
-                      width="56"
-                      cover
-                      v-if="item.photo"
-                      :src="`${baseUrl}${item.photo}`"
-                    />
-                    <v-img v-else :src="iconDocument" />
-                  </div>
-                </v-avatar>
-                <!-- Video duration badge -->
-                <v-chip
-                  v-if="isVideoFile(item.documentType) && item.duration"
-                  x-small
-                  color="black"
-                  text-color="white"
-                  class="ml-2"
-                >
-                  {{ formatDuration(item.duration) }}
-                </v-chip>
-              </div>
-            </template>
-
-            <template #[`item.title`]="{ item }">
-              <div class="d-flex flex-column">
-                <span class="font-weight-medium text-subtitle-1">{{
-                  item.title
-                }}</span>
-                <span class="text-caption grey--text">{{
-                  item.materialCategory?.name || "Uncategorized"
-                }}</span>
-              </div>
-            </template>
-
-            <template #[`item.materialFor.name`]="{ item }">
-              <v-chip
-                :color="
-                  item.materialFor?.name === 'student' ? 'blue' : 'orange'
-                "
-                small
-                class="font-weight-bold"
-              >
-                {{ item.materialFor?.name }}
-              </v-chip>
-            </template>
-
-            <template #[`item.materialType.name`]="{ item }">
-              <v-chip outlined small class="font-weight-medium">
-                {{ item.materialType?.name }}
-              </v-chip>
-            </template>
-
-            <template #[`item.documentType`]="{ item }">
-              <v-chip
-                :color="getDocumentTypeColor(item.documentType)"
-                small
-                class="font-weight-bold text-uppercase"
-              >
-                {{ item.documentType }}
-              </v-chip>
-            </template>
-
-            <template #[`item.date`]="{ item }">
-              <div class="d-flex flex-column">
-                <span class="text-caption">{{
-                  new Date(item.createdAt).toLocaleDateString("en-GB")
-                }}</span>
-                <span class="text-caption grey--text">{{
-                  getTimeAgo(item.createdAt)
-                }}</span>
-              </div>
-            </template>
-
-            <template #[`item.description`]="{ item }">
-              <span class="text-body-2 grey--text text--darken-1">
-                {{ item.description || "No description available" }}
-              </span>
-            </template>
-          </v-data-table>
-        </v-card>
-      </v-col>
-    </v-row>
-
-    <!-- Action Buttons Section -->
-    <v-row class="mt-6 mb-4">
-      <v-col cols="12" class="text-center">
-        <v-card
-          class="elevation-2 pa-6"
-          style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)"
+    <v-row justify="end">
+      <v-col cols="auto">
+        <v-btn
+          color="primary"
+          class="text-none"
+          @click="update"
+          :disabled="!selectedStudent.length || !selectedMaterials.length"
+          v-if="userInfo?.role !== 'user' || permission?.edit"
         >
-          <v-row align="center" justify="center">
-            <v-col cols="12" md="8">
-              <div class="text-center mb-4">
-                <v-icon size="48" color="primary" class="mb-2"
-                  >mdi-book-open-page-variant</v-icon
-                >
-                <h4
-                  class="text-h4 font-weight-bold grey--text text--darken-3 mb-2"
-                >
-                  Assign Library Materials
-                </h4>
-                <p class="text-body-1 grey--text">
-                  {{ selectedStudent.length }} student(s) selected •
-                  {{ selectedMaterials.length }} material(s) selected
-                </p>
-              </div>
-              <div class="d-flex justify-center ga-4">
-                <v-btn
-                  color="primary"
-                  x-large
-                  class="rounded-lg elevation-4 px-8"
-                  @click="update"
-                  :disabled="
-                    !selectedStudent.length || !selectedMaterials.length
-                  "
-                  v-if="userInfo?.role !== 'user' || permission?.edit"
-                >
-                  <v-icon left size="24">mdi-content-save</v-icon>
-                  Assign Materials
-                </v-btn>
-
-                <v-btn
-                  color="grey"
-                  x-large
-                  class="rounded-lg elevation-2 px-8"
-                  @click="clearSelection"
-                  outlined
-                >
-                  <v-icon left size="24">mdi-refresh</v-icon>
-                  Clear Selection
-                </v-btn>
-              </div>
-            </v-col>
-          </v-row>
-        </v-card>
+          <v-icon left> mdi-content-save </v-icon>
+          Update
+        </v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -568,153 +371,8 @@ export default {
       this.paginationMaterials.itemsPerPage = options.itemsPerPage;
       this.fetchDataMaterials();
     },
-    getDocumentTypeColor(type) {
-      const colors = {
-        pdf: "red",
-        doc: "blue",
-        docx: "blue",
-        xls: "green",
-        xlsx: "green",
-        ppt: "orange",
-        pptx: "orange",
-        jpg: "purple",
-        jpeg: "purple",
-        png: "purple",
-        gif: "purple",
-        mp4: "indigo",
-        avi: "indigo",
-        mp3: "teal",
-        wav: "teal",
-      };
-      return colors[type?.toLowerCase()] || "grey";
-    },
-    getTimeAgo(date) {
-      const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-      const intervals = {
-        year: 31536000,
-        month: 2592000,
-        week: 604800,
-        day: 86400,
-        hour: 3600,
-        minute: 60,
-      };
-
-      for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-        const interval = Math.floor(seconds / secondsInUnit);
-        if (interval >= 1) {
-          return interval === 1 ? `1 ${unit} ago` : `${interval} ${unit}s ago`;
-        }
-      }
-      return "Just now";
-    },
-    clearSelection() {
-      this.selectedStudent = [];
-      this.selectedMaterials = [];
-    },
-    isVideoFile(documentType) {
-      const videoTypes = [
-        "mp4",
-        "avi",
-        "mov",
-        "wmv",
-        "flv",
-        "webm",
-        "mkv",
-        "3gp",
-      ];
-      return videoTypes.includes(documentType?.toLowerCase());
-    },
-    formatDuration(duration) {
-      if (!duration) return "";
-
-      // Handle duration in seconds or HH:MM:SS format
-      if (typeof duration === "number") {
-        const hours = Math.floor(duration / 3600);
-        const minutes = Math.floor((duration % 3600) / 60);
-        const seconds = duration % 60;
-
-        if (hours > 0) {
-          return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds
-            .toString()
-            .padStart(2, "0")}`;
-        } else {
-          return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-        }
-      }
-
-      // If duration is already in HH:MM:SS format, return as is
-      return duration;
-    },
   },
 };
 </script>
 
-<style lang="scss" scoped>
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(239, 83, 80, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(239, 83, 80, 0);
-  }
-}
-
-.pulse-animation {
-  animation: pulse 2s infinite;
-}
-
-.v-avatar-light-bg.primary--text {
-  background-color: rgba(25, 118, 210, 0.12);
-  color: #1976d2;
-}
-
-.elevation-0 {
-  box-shadow: none !important;
-}
-
-.v-data-table.elevation-0 .v-data-table__wrapper {
-  border-radius: 0;
-}
-
-.v-chip {
-  font-weight: 500;
-}
-
-.v-card {
-  border-radius: 12px;
-}
-
-.v-btn.rounded-lg {
-  border-radius: 8px;
-}
-
-.v-text-field.rounded-lg .v-input__slot {
-  border-radius: 8px;
-}
-
-.video-thumbnail {
-  position: relative;
-  width: 56px;
-  height: 56px;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.video-placeholder {
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
-}
-
-.video-thumbnail:hover .video-placeholder {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
-}
-
-.video-thumbnail:hover .v-icon {
-  transform: scale(1.1);
-  transition: transform 0.2s ease;
-}
-</style>
+<style lang="scss" scoped></style>
