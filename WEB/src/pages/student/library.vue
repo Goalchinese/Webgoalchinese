@@ -45,7 +45,7 @@
           <!-- Material Thumbnail -->
           <div class="position-relative">
             <v-img
-              height="220"
+              height="160"
               :src="getThumbnailUrl(item)"
               class="material-image"
             >
@@ -54,7 +54,7 @@
                 v-if="isVideoFile(item?.material?.documentType)"
                 class="video-overlay d-flex align-center justify-center"
               >
-                <v-icon size="64" color="white" class="play-button">
+                <v-icon size="48" color="white" class="play-button">
                   mdi-play-circle
                 </v-icon>
               </div>
