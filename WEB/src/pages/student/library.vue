@@ -48,7 +48,6 @@
               height="160"
               :src="getThumbnailUrl(item)"
               class="material-image"
-              @error="handleImageError($event, item)"
             >
               <!-- Video Play Button Overlay -->
               <div
@@ -245,46 +244,20 @@ export default {
         return `${this.baseUrl}${item?.material?.photo}`;
       }
 
-      // For Canva files, try to get thumbnail
-      if (
-        item?.material?.documentType?.toLowerCase() === "canva" &&
-        item?.material?.link
-      ) {
-        // Extract Canva design ID from the link
-        const canvaUrl = item.material.link;
-        const designId = canvaUrl.match(/\/design\/([^/]+)/);
-        if (designId && designId[1]) {
-          // Try Canva's embed preview which should work
-          const id = designId[1];
-          return `https://www.canva.com/design/${id}/embed?embed=1`;
-        }
-      }
-
       // Return placeholder based on file type
       const docType = item?.material?.documentType?.toLowerCase();
+
+      // For Canva, return a special placeholder directly
+      if (docType === "canva") {
+        return "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzUwIiBoZWlnaHQ9IjE2MCIgdmlld0JveD0iMCAwIDM1MCAxNjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzNTAiIGhlaWdodD0iMTYwIiBmaWxsPSJ1cmwoI2NhbnZhR3JhZGllbnQpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImNhbnZhR3JhZGllbnQiIHgxPSIwIiB5MT0iMCIgeDI9IjM1MCIgeTI9IjE2MCI+CjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwMDdDQ0MiLz4KPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMDA0MkE5Ii8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPGNpcmNsZSBjeD0iMTc1IiBjeT0iODAiIHI9IjMwIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC4zIi8+CjxwYXRoIGQ9Ik0xNTUgNjVIMTkwVjk1SDE1NVY2NVoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNTUgNzVMMTcwIDg1TDE1NSA5NVY3NVoiIGZpbGw9IndoaXRlIi8+Cjx0ZXh0IHg9IjE3NSIgeT0iMTIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiPkNhbnZhPC90ZXh0Pgo8L3N2Zz4=";
+      }
+
       if (this.isVideoFile(docType)) {
         // Return video placeholder
         return "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzUwIiBoZWlnaHQ9IjE2MCIgdmlld0JveD0iMCAwIDM1MCAxNjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzNTAiIGhlaWdodD0iMTYwIiBmaWxsPSJ1cmwoI2dyYWRpZW50KSIvPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJncmFkaWVudCIgeDE9IjAiIHkxPSIwIiB4Mj0iMzUwIiB5Mj0iMTYwIj4KPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzY2N2VlYSIvPgo8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM3NjRiYTIiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8Y2lyY2xlIGN4PSIxNzUiIGN5PSI4MCIgcj0iMzAiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjMiLz4KPHBhdGggZD0iTTE2MCA2MEgxOTBWMTAwSDE2MFY2MFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNjAgNzVMMTgwIDg1TDE2MCA5NVY3NVoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==";
       }
 
-      // For Canva, return a special placeholder
-      if (docType === "canva") {
-        return "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzUwIiBoZWlnaHQ9IjE2MCIgdmlld0JveD0iMCAwIDM1MCAxNjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzNTAiIGhlaWdodD0iMTYwIiBmaWxsPSJ1cmwoI2NhbnZhR3JhZGllbnQpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImNhbnZhR3JhZGllbnQiIHgxPSIwIiB5MT0iMCIgeDI9IjM1MCIgeTI9IjE2MCI+CjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwMDdDQ0MiLz4KPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMDA0MkE5Ii8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPGNpcmNsZSBjeD0iMTc1IiBjeT0iODAiIHI9IjMwIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC4zIi8+CjxwYXRoIGQ9Ik0xNTUgNjVIMTkwVjk1SDE1NVY2NVoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNTUgNzVMMTcwIDg1TDE1NSA5NVY3NVoiIGZpbGw9IndoaXRlIi8+Cjx0ZXh0IHg9IjE3NSIgeT0iMTIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiPkNhbnZhPC90ZXh0Pgo8L3N2Zz4=";
-      }
-
       return iconDocument;
-    },
-    handleImageError(event, item) {
-      // If Canva embed fails, fallback to placeholder
-      if (item?.material?.documentType?.toLowerCase() === "canva") {
-        // Use Canva placeholder SVG
-        event.target.src =
-          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzUwIiBoZWlnaHQ9IjE2MCIgdmlld0JveD0iMCAwIDM1MCAxNjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzNTQiIGhlaWdodD0iMTYwIiBmaWxsPSJ1cmwoI2NhbnZhR3JhZGllbnQpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImNhbnZhR3JhZGllbnQiIHgxPSIwIiB5MT0iMCIgeDI9IjM1NCIgeTI9IjE2MCI+CjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwMDdDQ0MiLz4KPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMDA0MkE5Ii8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPGNpcmNsZSBjeD0iMTc3IiBjeT0iODAiIHI9IjMwIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC4zIi8+CjxwYXRoIGQ9Ik0xNTcgNjVIMTkyVjk1SDE1N1Y2NVoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNTcgNzVMMTcyIDg1TDE1NyA5NVY3NVoiIGZpbGw9IndoaXRlIi8+Cjx0ZXh0IHg9IjE3NyIgeT0iMTIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiPkNhbnZhPC90ZXh0Pgo8L3N2Zz4=";
-        return;
-      }
-
-      // For other types, use document icon
-      event.target.src = iconDocument;
     },
     isVideoFile(documentType) {
       const videoTypes = [
