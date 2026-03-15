@@ -1,26 +1,26 @@
 <template>
   <v-container fluid class="pa-0">
-    <!-- Modern Header with Gradient -->
+    <!-- Header Section -->
     <v-row>
       <v-col cols="12">
-        <v-card
-          class="elevation-6"
-          style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+        <v-sheet
+          rounded="lg"
+          color="info"
+          class="mx-auto d-flex justify-center align-center"
+          height="50"
+          width="100%"
         >
-          <v-card-title class="text-center py-6">
-            <v-icon large color="white" class="mr-3"
-              >mdi-book-open-variant</v-icon
-            >
-            <h3 class="text-h3 white--text font-weight-bold mb-0">
-              My Library
-            </h3>
-          </v-card-title>
-          <v-card-subtitle class="text-center pb-6">
-            <span class="text-h6 white--text text--lighten-2">
-              {{ itemsLibrary.length }} Materials Available
-            </span>
-          </v-card-subtitle>
-        </v-card>
+          <h4 class="text-h4 white--text font-weight-bold">My Library</h4>
+        </v-sheet>
+      </v-col>
+    </v-row>
+
+    <!-- Materials Count -->
+    <v-row class="mt-2">
+      <v-col cols="12" class="text-center">
+        <span class="text-h6 grey--text text--darken-1">
+          {{ itemsLibrary.length }} Materials Available
+        </span>
       </v-col>
     </v-row>
 
