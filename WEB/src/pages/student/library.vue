@@ -62,16 +62,26 @@
             </v-img>
 
             <!-- File Type Badge -->
-            <v-chip
-              :color="getFileTypeColor(item?.material?.documentType)"
-              small
-              class="file-type-badge"
-            >
-              <v-icon left x-small>{{
-                getFileTypeIcon(item?.material?.documentType)
-              }}</v-icon>
-              {{ item?.material?.documentType?.toUpperCase() }}
-            </v-chip>
+            <div class="file-type-badge">
+              <!-- Canva Logo -->
+              <img
+                v-if="item?.material?.documentType?.toLowerCase() === 'canva'"
+                :src="canvaLogo"
+                alt="Canva"
+                style="width: 60px; height: 20px; object-fit: contain"
+              />
+              <!-- Regular File Type Chip -->
+              <v-chip
+                v-else
+                :color="getFileTypeColor(item?.material?.documentType)"
+                small
+              >
+                <v-icon left x-small>{{
+                  getFileTypeIcon(item?.material?.documentType)
+                }}</v-icon>
+                {{ item?.material?.documentType?.toUpperCase() }}
+              </v-chip>
+            </div>
           </div>
 
           <!-- Material Info -->
@@ -197,6 +207,7 @@
 import { mapState } from "pinia";
 import { useAppStore } from "@/stores/app";
 import iconDocument from "@/assets/document.png";
+import canvaLogo from "@/assets/canvaLogo.jpg";
 
 import WebViewer from "@/components/WebViewer.vue";
 export default {
@@ -208,6 +219,7 @@ export default {
     return {
       fileUrl: "",
       iconDocument,
+      canvaLogo,
       isFullScreen: false,
       dialog: false,
       itemsLibrary: [],
