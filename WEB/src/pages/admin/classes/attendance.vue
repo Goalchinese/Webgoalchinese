@@ -298,12 +298,13 @@ export default {
   methods: {
     async fetchData() {
       try {
+        // Get all classes without pagination limit
         const { data } = await this.axios.get(
-          `/classes${this.search ? `?search=${this.search}` : ""}`
+          `/classes?limit=1000${this.search ? `&search=${this.search}` : ""}`
         );
         // Handle both data formats: direct array or wrapped in data property
         this.items = data.data || data || [];
-        console.log("Attendance data loaded:", this.items);
+        console.log("Attendance data loaded:", this.items.length, "classes");
       } catch (error) {
         console.error("Error fetching attendance data:", error);
         this.$swal.fire({
