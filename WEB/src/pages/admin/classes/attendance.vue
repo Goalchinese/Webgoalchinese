@@ -301,11 +301,15 @@ export default {
         const { data } = await this.axios.get(
           `/classes${this.search ? `?search=${this.search}` : ""}`
         );
-        this.items = data || [];
+        // Handle both data formats: direct array or wrapped in data property
+        this.items = data.data || data || [];
+        console.log("Attendance data loaded:", this.items);
       } catch (error) {
+        console.error("Error fetching attendance data:", error);
         this.$swal.fire({
-          title: error.response.data.error,
-          text: error.response.data.details,
+          title: error.response?.data?.error || "Error",
+          text:
+            error.response?.data?.details || "Failed to load attendance data",
           icon: "error",
         });
       }
