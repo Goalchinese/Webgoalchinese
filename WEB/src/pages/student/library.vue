@@ -67,7 +67,7 @@
                 v-if="item?.material?.documentType?.toLowerCase() === 'canva'"
                 :src="canvaLogo"
                 alt="Canva"
-                style="width: 60px; height: 20px; object-fit: contain"
+                style="width: 60px; height: 20px; object-fit: contain; border-radius: 12px;"
               />
               <!-- Regular File Type Chip -->
               <v-chip
