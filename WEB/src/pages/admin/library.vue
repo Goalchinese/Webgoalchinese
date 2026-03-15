@@ -255,10 +255,15 @@ export default {
     async fetchDataTeacher() {
       this.isLoadingStudents = true;
       try {
+        // Handle -1 (All) case - use large number instead of -1
+        const limit =
+          this.paginationStudents.itemsPerPage === -1
+            ? 1000
+            : this.paginationStudents.itemsPerPage;
         const params = {
           role: "student",
           page: this.paginationStudents.page,
-          limit: this.paginationStudents.itemsPerPage,
+          limit: limit,
         };
 
         if (this.search) {
@@ -283,10 +288,15 @@ export default {
     async fetchDataMaterials() {
       this.isLoadingMaterials = true;
       try {
+        // Handle -1 (All) case - use large number instead of -1
+        const limit =
+          this.paginationMaterials.itemsPerPage === -1
+            ? 1000
+            : this.paginationMaterials.itemsPerPage;
         const params = {
           materialFor: "library",
           page: this.paginationMaterials.page,
-          limit: this.paginationMaterials.itemsPerPage,
+          limit: limit,
         };
 
         if (this.searchMaterials) {
