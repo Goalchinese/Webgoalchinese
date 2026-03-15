@@ -245,7 +245,7 @@ export default {
         return `${this.baseUrl}${item?.material?.photo}`;
       }
 
-      // For Canva files, try multiple approaches
+      // For Canva files, try to get thumbnail
       if (
         item?.material?.documentType?.toLowerCase() === "canva" &&
         item?.material?.link
@@ -254,17 +254,9 @@ export default {
         const canvaUrl = item.material.link;
         const designId = canvaUrl.match(/\/design\/([^/]+)/);
         if (designId && designId[1]) {
-          // Try different Canva thumbnail URLs
+          // Try Canva's embed preview which should work
           const id = designId[1];
-          const thumbnailUrls = [
-            `https://www.canva.com/design/${id}/thumbnail`,
-            `https://www.canva.com/design/${id}/preview/thumbnail`,
-            `https://thumbnail.canva.com/${id}`,
-            `https://canva.com/design/${id}/thumbnail.jpg`,
-          ];
-
-          // Return the first option (will try others if this fails via onerror)
-          return thumbnailUrls[0];
+          return `https://www.canva.com/design/${id}/embed?embed=1`;
         }
       }
 
@@ -283,31 +275,15 @@ export default {
       return iconDocument;
     },
     handleImageError(event, item) {
-      // If Canva thumbnail fails, try the next URL or fallback
+      // If Canva embed fails, fallback to placeholder
       if (item?.material?.documentType?.toLowerCase() === "canva") {
-        const canvaUrl = item.material.link;
-        const designId = canvaUrl.match(/\/design\/([^/]+)/);
-        if (designId && designId[1]) {
-          const id = designId[1];
-          const thumbnailUrls = [
-            `https://www.canva.com/design/${id}/preview/thumbnail`,
-            `https://thumbnail.canva.com/${id}`,
-            `https://canva.com/design/${id}/thumbnail.jpg`,
-          ];
-
-          // Try the next URL in the list
-          const currentSrc = event.target.src;
-          const nextUrl = thumbnailUrls.find(
-            (url) => !currentSrc.includes(url)
-          );
-          if (nextUrl) {
-            event.target.src = nextUrl;
-            return;
-          }
-        }
+        // Use Canva placeholder SVG
+        event.target.src =
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzUwIiBoZWlnaHQ9IjE2MCIgdmlld0JveD0iMCAwIDM1MCAxNjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzNTQiIGhlaWdodD0iMTYwIiBmaWxsPSJ1cmwoI2NhbnZhR3JhZGllbnQpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImNhbnZhR3JhZGllbnQiIHgxPSIwIiB5MT0iMCIgeDI9IjM1NCIgeTI9IjE2MCI+CjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwMDdDQ0MiLz4KPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMDA0MkE5Ii8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPGNpcmNsZSBjeD0iMTc3IiBjeT0iODAiIHI9IjMwIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC4zIi8+CjxwYXRoIGQ9Ik0xNTcgNjVIMTkyVjk1SDE1N1Y2NVoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xNTcgNzVMMTcyIDg1TDE1NyA5NVY3NVoiIGZpbGw9IndoaXRlIi8+Cjx0ZXh0IHg9IjE3NyIgeT0iMTIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiPkNhbnZhPC90ZXh0Pgo8L3N2Zz4=";
+        return;
       }
 
-      // Final fallback - use document icon
+      // For other types, use document icon
       event.target.src = iconDocument;
     },
     isVideoFile(documentType) {
