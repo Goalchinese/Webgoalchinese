@@ -227,6 +227,21 @@ export default {
   },
   methods: {
     getThumbnailUrl(item) {
+      // For Canva files, use the Canva thumbnail API
+      if (
+        item?.material?.documentType?.toLowerCase() === "canva" &&
+        item?.material?.link
+      ) {
+        // Extract Canva design ID from the link
+        const canvaUrl = item.material.link;
+        const designId = canvaUrl.match(/\/design\/([^/]+)/);
+        if (designId && designId[1]) {
+          // Use Canva's thumbnail API to get the first page preview
+          return `https://www.canva.com/design/${designId[1]}/thumbnail`;
+        }
+      }
+
+      // Use uploaded photo if available
       if (item?.material?.photo) {
         return `${this.baseUrl}${item?.material?.photo}`;
       }
