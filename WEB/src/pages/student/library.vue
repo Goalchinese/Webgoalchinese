@@ -25,7 +25,7 @@
     </v-row>
 
     <!-- Materials Grid -->
-    <v-row class="mt-6" justify="center">
+    <v-row class="mt-6">
       <v-col
         v-for="(item, i) in itemsLibrary"
         :key="i"
@@ -33,7 +33,6 @@
         sm="6"
         md="4"
         lg="3"
-        class="d-flex"
       >
         <v-card
           class="mx-auto material-card elevation-4"
