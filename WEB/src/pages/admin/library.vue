@@ -187,16 +187,57 @@
             class="elevation-0"
           >
             <template #item.photo="{ item }">
-              <v-avatar size="56" rounded class="my-2 elevation-2">
-                <v-img
-                  height="56"
-                  width="56"
-                  cover
-                  v-if="item.photo"
-                  :src="`${baseUrl}${item.photo}`"
-                />
-                <v-img v-else :src="iconDocument" />
-              </v-avatar>
+              <div class="d-flex align-center">
+                <v-avatar size="56" rounded class="my-2 elevation-2">
+                  <!-- Video thumbnail for video files -->
+                  <div
+                    v-if="isVideoFile(item.documentType)"
+                    class="video-thumbnail"
+                  >
+                    <v-img
+                      height="56"
+                      width="56"
+                      cover
+                      v-if="item.photo"
+                      :src="`${baseUrl}${item.photo}`"
+                    />
+                    <div
+                      v-else
+                      class="video-placeholder d-flex align-center justify-center"
+                      style="
+                        background: linear-gradient(
+                          135deg,
+                          #667eea 0%,
+                          #764ba2 100%
+                        );
+                      "
+                    >
+                      <v-icon color="white" size="32">mdi-play-circle</v-icon>
+                    </div>
+                  </div>
+                  <!-- Regular document/image -->
+                  <div v-else>
+                    <v-img
+                      height="56"
+                      width="56"
+                      cover
+                      v-if="item.photo"
+                      :src="`${baseUrl}${item.photo}`"
+                    />
+                    <v-img v-else :src="iconDocument" />
+                  </div>
+                </v-avatar>
+                <!-- Video duration badge -->
+                <v-chip
+                  v-if="isVideoFile(item.documentType) && item.duration"
+                  x-small
+                  color="black"
+                  text-color="white"
+                  class="ml-2"
+                >
+                  {{ formatDuration(item.duration) }}
+                </v-chip>
+              </div>
             </template>
 
             <template #[`item.title`]="{ item }">
@@ -570,6 +611,40 @@ export default {
       this.selectedStudent = [];
       this.selectedMaterials = [];
     },
+    isVideoFile(documentType) {
+      const videoTypes = [
+        "mp4",
+        "avi",
+        "mov",
+        "wmv",
+        "flv",
+        "webm",
+        "mkv",
+        "3gp",
+      ];
+      return videoTypes.includes(documentType?.toLowerCase());
+    },
+    formatDuration(duration) {
+      if (!duration) return "";
+
+      // Handle duration in seconds or HH:MM:SS format
+      if (typeof duration === "number") {
+        const hours = Math.floor(duration / 3600);
+        const minutes = Math.floor((duration % 3600) / 60);
+        const seconds = duration % 60;
+
+        if (hours > 0) {
+          return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds
+            .toString()
+            .padStart(2, "0")}`;
+        } else {
+          return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+        }
+      }
+
+      // If duration is already in HH:MM:SS format, return as is
+      return duration;
+    },
   },
 };
 </script>
@@ -618,5 +693,28 @@ export default {
 
 .v-text-field.rounded-lg .v-input__slot {
   border-radius: 8px;
+}
+
+.video-thumbnail {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.video-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+.video-thumbnail:hover .video-placeholder {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+}
+
+.video-thumbnail:hover .v-icon {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
 }
 </style>
