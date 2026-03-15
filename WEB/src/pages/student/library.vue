@@ -71,7 +71,7 @@
                   width: 60px;
                   height: 20px;
                   object-fit: contain;
-                  border-radius: 12px;
+                  border-radius: 20px;
                 "
               />
               <!-- Regular File Type Chip -->
