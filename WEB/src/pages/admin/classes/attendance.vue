@@ -28,6 +28,12 @@
           :filter-keys="['title', 'category', 'type']"
           mobile-breakpoint="0"
           :items="items"
+          :items-per-page="10"
+          :footer-props="{
+            'items-per-page-options': [10, 25, 50, -1],
+            'show-current-page': true,
+            'show-first-last-page': true,
+          }"
         >
           <template #item.studyDay="{ item }">
             <v-row dense v-for="(it, i) in item.classStudy" :key="i">
