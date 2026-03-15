@@ -28,8 +28,10 @@
           :filter-keys="['title', 'category', 'type']"
           mobile-breakpoint="0"
           :items="items"
-          :items-per-page="10"
-          hide-default-footer
+          :loading="isLoading"
+          :server-items-length="pagination.total"
+          :options.sync="pagination"
+          @update:options="updatePagination"
         >
           <template #item.studyDay="{ item }">
             <v-row dense v-for="(it, i) in item.classStudy" :key="i">
@@ -232,6 +234,12 @@ export default {
       dialog: false,
       menu2: false,
       search: "",
+      isLoading: false,
+      pagination: {
+        page: 1,
+        itemsPerPage: 10,
+        total: 0,
+      },
       headers: [
         {
           align: "start",
@@ -299,14 +307,29 @@ export default {
   },
   methods: {
     async fetchData() {
+      this.isLoading = true;
       try {
-        // Get all classes without pagination limit
+        const { page, itemsPerPage } = this.pagination;
         const { data } = await this.axios.get(
-          `/classes?limit=1000${this.search ? `&search=${this.search}` : ""}`
+          `/classes?page=${page}&limit=${itemsPerPage}${
+            this.search ? `&search=${this.search}` : ""
+          }`
         );
-        // Handle both data formats: direct array or wrapped in data property
-        this.items = data.data || data || [];
-        console.log("Attendance data loaded:", this.items.length, "classes");
+
+        // Handle both data formats
+        const items = data.data || data || [];
+        const total = data.total || data.length || 0;
+
+        this.items = items;
+        this.pagination.total = total;
+
+        console.log(
+          "Attendance data loaded:",
+          this.items.length,
+          "of",
+          total,
+          "classes"
+        );
       } catch (error) {
         console.error("Error fetching attendance data:", error);
         this.$swal.fire({
@@ -315,7 +338,14 @@ export default {
             error.response?.data?.details || "Failed to load attendance data",
           icon: "error",
         });
+      } finally {
+        this.isLoading = false;
       }
+    },
+    updatePagination(options) {
+      this.pagination.page = options.page;
+      this.pagination.itemsPerPage = options.itemsPerPage;
+      this.fetchData();
     },
     resolveStatus(status) {
       switch (status) {
