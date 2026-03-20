@@ -999,12 +999,12 @@ export default {
         const { data: dataTeacher } = await this.axios.get(
           `/account?role=teacher`
         );
-        this.itemsOptions.teacher = dataTeacher || [];
+        this.itemsOptions.teacher = dataTeacher.data || [];
 
         const { data: dataStudent } = await this.axios.get(
           `/account?role=student`
         );
-        this.itemsOptions.student = dataStudent || [];
+        this.itemsOptions.student = dataStudent.data || [];
       } catch (error) {
         this.$swal.fire({
           title: error.response.data.error,
