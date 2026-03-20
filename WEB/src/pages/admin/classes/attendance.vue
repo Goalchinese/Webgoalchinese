@@ -370,7 +370,7 @@ export default {
         ...item,
         studyDate: item.studyDate
           ? new Date(item.studyDate).toISOString().substring(0, 10)
-          : new Date().toISOString().substring(0, 10),
+          : this.date, // ใช้วันที่ปัจจุบันจาก data แทนการสร้างใหม่
       };
       this.dialog = true;
     },
@@ -383,8 +383,7 @@ export default {
           ...item.attendance.map((att) => ({
             ...att,
             status: att.status || "regular", // Default to regular for completed classes
-            studyDate:
-              att.studyDate || new Date().toISOString().substring(0, 10),
+            studyDate: att.studyDate || this.date, // ใช้ studyDate จริงจากฐานข้อมูล
           }))
         );
       }
@@ -396,7 +395,7 @@ export default {
         i++
       ) {
         times.push({
-          studyDate: new Date().toISOString().substring(0, 10),
+          studyDate: this.date, // ใช้วันที่ปัจจุบันจาก data แทนการสร้างใหม่
           classId: null,
           status: "",
         });
