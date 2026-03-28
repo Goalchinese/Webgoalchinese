@@ -166,6 +166,7 @@
                   v-model="formInput.teacherID"
                   :items="itemsOptions.teacher"
                   :readonly="flagView"
+                  :loading="isLoadingTeachers"
                   item-text="name"
                   item-value="id"
                   dense
@@ -185,6 +186,7 @@
                   v-model="selectedStudent"
                   :readonly="flagView"
                   :items="itemsOptions.student"
+                  :loading="isLoadingStudents"
                   dense
                   item-text="name"
                   item-value="id"
@@ -777,6 +779,8 @@ export default {
       date: null,
 
       selectedCheckList: [],
+      isLoadingTeachers: false,
+      isLoadingStudents: false,
       checkList: [
         "Send metarials to students",
         "Send study link to students",
@@ -996,16 +1000,24 @@ export default {
         const { data: dataCurrency } = await this.axios.get(`/currency`);
         this.itemsOptions.currency = dataCurrency;
 
+        // Fetch teachers with loading state
+        this.isLoadingTeachers = true;
         const { data: dataTeacher } = await this.axios.get(
-          `/account?role=teacher`
+          `/account?role=teacher&limit=1000`
         );
         this.itemsOptions.teacher = dataTeacher.data || [];
+        this.isLoadingTeachers = false;
 
+        // Fetch students with loading state
+        this.isLoadingStudents = true;
         const { data: dataStudent } = await this.axios.get(
-          `/account?role=student`
+          `/account?role=student&limit=1000`
         );
         this.itemsOptions.student = dataStudent.data || [];
+        this.isLoadingStudents = false;
       } catch (error) {
+        this.isLoadingTeachers = false;
+        this.isLoadingStudents = false;
         this.$swal.fire({
           title: error.response.data.error,
           text: error.response.data.details,

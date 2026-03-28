@@ -190,9 +190,13 @@ export default {
           this.pagination.itemsPerPage === -1
             ? 1000
             : this.pagination.itemsPerPage;
+        
+        // When selecting "All", always fetch from page 1 to avoid offset issues
+        const page = this.pagination.itemsPerPage === -1 ? 1 : this.pagination.page;
+        
         const params = {
           role: "teacher",
-          page: this.pagination.page,
+          page: page,
           limit: limit,
         };
 
