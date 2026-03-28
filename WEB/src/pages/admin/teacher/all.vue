@@ -244,6 +244,15 @@ export default {
         });
       }
     },
+    updatePagination(options) {
+      this.pagination.page = options.page;
+      this.pagination.itemsPerPage = options.itemsPerPage;
+      // When selecting "All", reset to page 1 to show all data
+      if (options.itemsPerPage === -1) {
+        this.pagination.page = 1;
+      }
+      this.fetchData();
+    },
   },
 };
 </script>
