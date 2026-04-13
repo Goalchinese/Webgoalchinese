@@ -501,7 +501,9 @@
                   </span>
                 </template>
 
-                <template v-else-if="getStudentsInClass(selectedClass).length === 1">
+                <template
+                  v-else-if="getStudentsInClass(selectedClass).length === 1"
+                >
                   <v-chip small color="primary" outlined class="ml-2">
                     {{ getStudentsInClass(selectedClass)[0].account.name }}
                   </v-chip>
