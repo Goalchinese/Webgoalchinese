@@ -489,15 +489,15 @@
 
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
-                <template v-if="selectedClass?.classStudent?.length === 1">
+                <template v-if="getStudentsInClass(selectedClass).length === 1">
                   <v-chip small color="primary" outlined class="ml-2">
-                    {{ selectedClass.classStudent[0].account.name }}
+                    {{ getStudentsInClass(selectedClass)[0].account.name }}
                   </v-chip>
                 </template>
 
-                <template v-else-if="selectedClass?.classStudent?.length > 1">
+                <template v-else-if="getStudentsInClass(selectedClass).length > 1">
                   <v-chip
-                    v-for="student in selectedClass.classStudent"
+                    v-for="student in getStudentsInClass(selectedClass)"
                     :key="student.id"
                     small
                     color="primary"
