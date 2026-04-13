@@ -495,7 +495,9 @@
                   </v-chip>
                 </template>
 
-                <template v-else-if="getStudentsInClass(selectedClass).length > 1">
+                <template
+                  v-else-if="getStudentsInClass(selectedClass).length > 1"
+                >
                   <v-chip
                     v-for="student in getStudentsInClass(selectedClass)"
                     :key="student.id"
