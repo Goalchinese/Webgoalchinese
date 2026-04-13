@@ -489,7 +489,19 @@
 
                 <span class="subtitle-2 mx-2">Student in class :</span>
 
-                <template v-if="getStudentsInClass(selectedClass).length === 1">
+                <template v-if="loadingStudents">
+                  <span style="color: orange">
+                    <v-progress-circular
+                      indeterminate
+                      size="16"
+                      width="2"
+                      class="mr-2"
+                    ></v-progress-circular>
+                    Loading students...
+                  </span>
+                </template>
+
+                <template v-else-if="getStudentsInClass(selectedClass).length === 1">
                   <v-chip small color="primary" outlined class="ml-2">
                     {{ getStudentsInClass(selectedClass)[0].account.name }}
                   </v-chip>
