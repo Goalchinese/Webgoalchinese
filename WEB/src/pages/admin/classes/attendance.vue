@@ -25,7 +25,6 @@
       <v-col cols="12">
         <v-data-table
           :headers="headers"
-          :filter-keys="['title', 'category', 'type']"
           mobile-breakpoint="0"
           :items="items"
           :loading="isLoading"
@@ -300,6 +299,8 @@ export default {
   },
   watch: {
     search() {
+      // Reset to page 1 when search changes to ensure consistent results
+      this.pagination.page = 1;
       this.fetchData();
     },
   },
@@ -348,6 +349,7 @@ export default {
     updatePagination(options) {
       this.pagination.page = options.page;
       this.pagination.itemsPerPage = options.itemsPerPage;
+      // Ensure search is maintained when pagination changes
       this.fetchData();
     },
     resolveStatus(status) {
