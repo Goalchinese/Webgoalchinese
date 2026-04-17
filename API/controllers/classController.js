@@ -226,16 +226,25 @@ exports.findOne = async (req, res) => {
 
 // Update a Class by ID
 exports.update = async (req, res) => {
+  const t = await sequelize.transaction();
+  
   try {
     const { id } = req.params;
-    const [updated] = await Class.update(req.body, { where: { id } });
+    const [updated] = await Class.update(req.body, { 
+      where: { id },
+      transaction: t 
+    });
     if (!updated) {
+      await t.rollback();
       return res.status(404).json({ message: "Class not found" });
     }
 
     // If the request body contains classStudy data
     if (req.body.classStudy) {
-      await ClassStudy.destroy({ where: { classID: id } });
+      await ClassStudy.destroy({ 
+        where: { classID: id },
+        transaction: t 
+      });
       await ClassStudy.bulkCreate(
         req.body.classStudy.map((item) => ({
           classID: id,
@@ -243,24 +252,32 @@ exports.update = async (req, res) => {
           startTime: item.startTime,
           endTime: item.endTime,
           note: item.note,
-        }))
+        })),
+        { transaction: t }
       );
     }
 
     // If the request body contains classStudent data
     if (req.body.classStudent) {
-      await ClassStudent.destroy({ where: { classID: id } });
+      await ClassStudent.destroy({ 
+        where: { classID: id },
+        transaction: t 
+      });
       await ClassStudent.bulkCreate(
         req.body.classStudent.map((accId) => ({
           accountID: accId,
           classID: id,
-        }))
+        })),
+        { transaction: t }
       );
     }
+
+    await t.commit();
     res.status(200).json({ message: "Class updated successfully" });
 
     logger.info(`Class updated: ${id} by [${req.user.id}]${req.user.username}`);
   } catch (error) {
+    await t.rollback();
     res
       .status(400)
       .json({ message: "Error updating class", error: error.message });

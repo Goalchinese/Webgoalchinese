@@ -264,6 +264,10 @@ export default {
       (it) => it.link === this.$route.path
     );
   },
+  activated() {
+    // Refresh data when page becomes visible (after navigation)
+    this.fetchData();
+  },
   methods: {
     async fetchData() {
       this.isLoading = true;
