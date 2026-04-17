@@ -1026,17 +1026,28 @@ export default {
       }
     },
     emitData() {
+      const classStudyData = this.itemsTimes
+        .filter(
+          (item) =>
+            item.checked &&
+            item.startTime &&
+            item.endTime &&
+            item.startTime !== "00:00" &&
+            item.endTime !== "00:01"
+        )
+        .map((item) => ({
+          value: item.value,
+          startTime: item.startTime,
+          endTime: item.endTime,
+          note: item.note,
+        }));
+
+      console.log("emitData - classStudy being sent:", classStudyData);
+
       this.$emit("input", {
         ...this.formInput,
         checkList: this.selectedCheckList.join(","),
-        classStudy: this.itemsTimes
-          .filter((item) => item.checked)
-          .map((item) => ({
-            value: item.value,
-            startTime: item.startTime,
-            endTime: item.endTime,
-            note: item.note,
-          })),
+        classStudy: classStudyData,
         classStudent: this.selectedStudent,
         updateBy: this.userInfo.accountID,
       });

@@ -241,20 +241,35 @@ exports.update = async (req, res) => {
 
     // If the request body contains classStudy data
     if (req.body.classStudy) {
-      await ClassStudy.destroy({ 
-        where: { classID: id },
-        transaction: t 
-      });
-      await ClassStudy.bulkCreate(
-        req.body.classStudy.map((item) => ({
+      console.log('Backend - received classStudy:', req.body.classStudy);
+      
+      try {
+        console.log('Backend - destroying existing ClassStudy for classID:', id);
+        
+        const destroyedCount = await ClassStudy.destroy({ 
+          where: { classID: id },
+          transaction: t 
+        });
+        
+        console.log('Backend - destroyed ClassStudy count:', destroyedCount);
+        
+        const classStudyToCreate = req.body.classStudy.map((item) => ({
           classID: id,
           day: item.value,
           startTime: item.startTime,
           endTime: item.endTime,
           note: item.note,
-        })),
-        { transaction: t }
-      );
+        }));
+        
+        console.log('Backend - creating new ClassStudy:', classStudyToCreate);
+        
+        await ClassStudy.bulkCreate(classStudyToCreate, { transaction: t });
+        
+        console.log('Backend - ClassStudy update completed successfully');
+      } catch (classStudyError) {
+        console.error('Backend - ClassStudy update failed:', classStudyError);
+        throw classStudyError; // Re-throw to rollback transaction
+      }
     }
 
     // If the request body contains classStudent data
