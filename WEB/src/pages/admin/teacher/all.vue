@@ -46,7 +46,6 @@
       <v-col cols="12">
         <v-data-table
           :headers="headers"
-          :filter-keys="['title', 'category', 'type']"
           :items="items"
           :loading="isLoading"
           :server-items-length="pagination.total"
@@ -172,6 +171,8 @@ export default {
   },
   watch: {
     search() {
+      // Reset to page 1 when search changes to ensure consistent results
+      this.pagination.page = 1;
       this.fetchData();
     },
   },
@@ -247,7 +248,7 @@ export default {
     updatePagination(options) {
       this.pagination.page = options.page;
       this.pagination.itemsPerPage = options.itemsPerPage;
-      // When selecting "All", reset to page 1 to show all data
+      // Ensure search is maintained when pagination changes
       if (options.itemsPerPage === -1) {
         this.pagination.page = 1;
       }

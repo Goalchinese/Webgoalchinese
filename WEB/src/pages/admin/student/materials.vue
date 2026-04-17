@@ -48,7 +48,6 @@
         <v-data-table
           v-model="selectedStudent"
           :headers="headers"
-          :filter-keys="['title', 'category', 'type']"
           :items="items"
           :loading="isLoadingStudents"
           :server-items-length="paginationStudents.total"
@@ -112,7 +111,6 @@
         <v-data-table
           v-model="selectedMaterials"
           :headers="headersMaterials"
-          :filter-keys="['title', 'category', 'type']"
           :items="itemsMaterials"
           :loading="isLoadingMaterials"
           :server-items-length="paginationMaterials.total"
@@ -241,9 +239,13 @@ export default {
   },
   watch: {
     search() {
+      // Reset to page 1 when search changes to ensure consistent results
+      this.paginationStudents.page = 1;
       this.fetchDataTeacher();
     },
     searchMaterials() {
+      // Reset to page 1 when search changes to ensure consistent results
+      this.paginationMaterials.page = 1;
       this.fetchDataMaterials();
     },
   },
@@ -345,11 +347,13 @@ export default {
     updatePaginationStudents(options) {
       this.paginationStudents.page = options.page;
       this.paginationStudents.itemsPerPage = options.itemsPerPage;
+      // Ensure search is maintained when pagination changes
       this.fetchDataTeacher();
     },
     updatePaginationMaterials(options) {
       this.paginationMaterials.page = options.page;
       this.paginationMaterials.itemsPerPage = options.itemsPerPage;
+      // Ensure search is maintained when pagination changes
       this.fetchDataMaterials();
     },
     async clearMaterials() {

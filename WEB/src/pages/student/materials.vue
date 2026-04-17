@@ -30,12 +30,7 @@
       </v-row>
       <v-row dense>
         <v-col cols="12">
-          <v-data-table
-            :headers="headers"
-            :filter-keys="['title', 'category', 'type']"
-            :items="items"
-            mobile-breakpoint="0"
-          >
+          <v-data-table :headers="headers" :items="items" mobile-breakpoint="0">
             <template #item.photo="{ item }">
               <v-avatar size="64" rounded color="grey lighten-4" class="my-2">
                 <v-img
