@@ -1029,7 +1029,14 @@ export default {
       this.$emit("input", {
         ...this.formInput,
         checkList: this.selectedCheckList.join(","),
-        classStudy: this.itemsTimes.filter((item) => item.checked),
+        classStudy: this.itemsTimes
+          .filter((item) => item.checked)
+          .map((item) => ({
+            value: item.value,
+            startTime: item.startTime,
+            endTime: item.endTime,
+            note: item.note,
+          })),
         classStudent: this.selectedStudent,
         updateBy: this.userInfo.accountID,
       });
