@@ -1,0 +1,55 @@
+// Write your overrides
+
+// SweetAlert2 — make every Swal.fire() look consistent app-wide,
+// matching Vuetify flat/rounded button style, regardless of per-call options.
+.swal2-popup {
+  border-radius: 12px;
+  font-family: inherit;
+}
+
+.swal2-title {
+  font-size: 1.25rem;
+}
+
+.swal2-html-container {
+  font-size: 0.9375rem;
+}
+
+.swal2-actions {
+  gap: 0.5rem;
+}
+
+.swal2-styled.swal2-confirm {
+  background-color: rgb(var(--v-theme-primary)) !important;
+  color: rgb(var(--v-theme-on-primary)) !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 500;
+  box-shadow: none !important;
+
+  &:focus {
+    box-shadow: none !important;
+  }
+}
+
+.swal2-styled.swal2-cancel {
+  background-color: rgb(var(--v-theme-error)) !important;
+  color: rgb(var(--v-theme-on-error)) !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 500;
+  box-shadow: none !important;
+
+  &:focus {
+    box-shadow: none !important;
+  }
+}
+
+.swal2-styled.swal2-deny {
+  background-color: rgb(var(--v-theme-surface)) !important;
+  color: rgb(var(--v-theme-on-surface)) !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 500;
+  box-shadow: none !important;
+}
