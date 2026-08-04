@@ -94,6 +94,7 @@ exports.findAll = async (req, res) => {
     
     // Create cache key based on filters
     const cacheKey = `events-${branchId || 'all'}-${teacherId || 'all'}-${studentId || 'all'}`;
+    console.log(`Cache key: ${cacheKey}`);
     
     // Check cache first
     const cached = eventsCache.get(cacheKey);
@@ -134,15 +135,21 @@ exports.findAll = async (req, res) => {
           model: Class,
           as: "class",
           attributes: ["id", "name", "no", "studyPlatform", "link"],
+          where: branchId ? { branchId } : undefined, // Filter by branchId if provided
+          required: !!(branchId || teacherId || studentId),
           include: [
             {
               model: Account,
               as: "teacher",
               attributes: ["id", "name"],
+              where: teacherId ? { id: teacherId } : undefined, // Filter by teacherId if provided
+              required: !!teacherId,
             },
             {
               model: ClassStudent,
               as: "classStudent",
+              where: studentId ? { accountID: studentId } : undefined, // Filter by studentId if provided
+              required: !!studentId,
               include: [
                 {
                   model: Account,

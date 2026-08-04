@@ -5,7 +5,9 @@ const path = require("path");
 // Upload logo and update academyName
 exports.create = async (req, res) => {
   try {
-    const { academyName, target } = req.body; // Extract academyName from the request body
+    const { academyName, target, contacts } = req.body; // Extract fields from the request body
+    const parsedContacts =
+      typeof contacts === "string" ? JSON.parse(contacts) : contacts;
 
     // Find the existing setting (or create one if necessary)
     let setting = await Setting.findOne();
@@ -15,13 +17,15 @@ exports.create = async (req, res) => {
           academyName,
           logo: req.files?.logo ? req.files.logo[0].path : null,
           target,
+          contacts: parsedContacts,
         });
       } else {
-        setting = await Setting.create({ academyName, target });
+        setting = await Setting.create({ academyName, target, contacts: parsedContacts });
       }
     } else {
       setting.academyName = academyName;
       setting.target = target;
+      if (parsedContacts !== undefined) setting.contacts = parsedContacts;
       if (req.files)
         setting.logo = req.files?.logo ? req.files.logo[0].path : setting.logo; // Save the uploaded file path in the 'logo' column
       await setting.save();

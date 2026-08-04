@@ -17,17 +17,20 @@ exports.login = async (req, res) => {
     // Step 1: Find the user by username
     const user = await User.findOne({ where: { username } });
     if (!user) {
+      logger.warn(`Failed login attempt for user: ${username}`);
       return res.status(400).json({ error: "Invalid username or password" });
     }
 
     //check if user is expired
     if (user.expireDate && new Date(user.expireDate) < new Date()) {
+      logger.warn(`Failed login attempt for user: ${user.username}`);
       return res.status(400).json({ error: "User expired" });
     }
 
     // Step 2: Compare the password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      logger.warn(`Failed login attempt for user: ${user.username}`);
       return res.status(400).json({ error: "Invalid username or password" });
     }
 
@@ -35,6 +38,7 @@ exports.login = async (req, res) => {
       where: { id: user.accountID, status: "Active" },
     });
     if (!account) {
+      logger.warn(`Failed login attempt for user: ${user.username}`);
       return res.status(400).json({ error: "Account is not active" });
     }
 
@@ -71,6 +75,7 @@ exports.login = async (req, res) => {
 
     logger.info(`User ${user.username} logged in`);
   } catch (error) {
+    logger.error(`Error occurred while logging in user: ${user.username}`, error);
     res.status(500).json({ error: error.message });
   }
 };
