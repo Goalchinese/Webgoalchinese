@@ -21,11 +21,11 @@ restartPolicyMaxRetries = 10
 
 [[services]]
 name = "web"
-source = "WEB"
+source = "WEB NEW"
 [services.build]
-builder = "nixpacks"
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
 [services.deploy]
-startCommand = "npm run build && npm run serve"
 healthcheckPath = "/"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
