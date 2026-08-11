@@ -768,7 +768,9 @@ onMounted(() => {
                   <span class="text-subtitle-2 mx-2">Link :</span>
                 </VCol>
                 <VCol cols="">
-                  <span>{{ selectedEvent?.link }}</span>
+                  <a :href="selectedEvent?.link" target="_blank" rel="noopener noreferrer">
+                    {{ selectedEvent?.link }}
+                  </a>
                 </VCol>
               </VRow>
             </VCol>
