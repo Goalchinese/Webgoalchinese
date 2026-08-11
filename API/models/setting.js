@@ -17,6 +17,11 @@ const Setting = sequelize.define(
       allowNull: true,
       defaultValue: 0,
     },
+    contacts: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: [{ label: "Line", url: "" }],
+    },
   },
   {
     freezeTableName: true,

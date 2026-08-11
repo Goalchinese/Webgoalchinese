@@ -67,25 +67,84 @@ exports.create = async (req, res, next) => {
 // Retrieve all Classes
 exports.findAll = async (req, res) => {
   try {
-    const { search, page = 1, limit = 10 } = req.query;
+    const {
+      search,
+      page = 1,
+      limit = 10,
+      classType,
+      studyDay,
+      status,
+      remaining,
+    } = req.query;
     const offset = (page - 1) * limit;
-    
+
     let where = {};
     if (search) {
-      where = {
-        [Op.or]: [
-          sequelize.where(
-            sequelize.fn("LOWER", sequelize.col("Class.name")),
-            "LIKE",
-            `%${search.toLowerCase()}%`
-          ),
-          sequelize.where(
-            sequelize.fn("LOWER", sequelize.col("Class.no")),
-            "LIKE",
-            `%${search.toLowerCase()}%`
-          ),
-        ],
-      };
+      where[Op.or] = [
+        sequelize.where(
+          sequelize.fn("LOWER", sequelize.col("Class.name")),
+          "LIKE",
+          `%${search.toLowerCase()}%`
+        ),
+        sequelize.where(
+          sequelize.fn("LOWER", sequelize.col("Class.no")),
+          "LIKE",
+          `%${search.toLowerCase()}%`
+        ),
+      ];
+    }
+    if (classType) where.classTypeID = classType;
+    if (status) where.status = status;
+    if (studyDay) {
+      const matchingClassStudy = await ClassStudy.findAll({
+        where: { day: studyDay },
+        attributes: ["classID"],
+        raw: true,
+      });
+      where.id = { [Op.in]: matchingClassStudy.map((it) => it.classID) };
+    }
+
+    const include = [
+      { model: ClassStudy, as: "classStudy" },
+      { model: Account, as: "teacher", attributes: ["id", "name"] },
+      { model: ClassType, as: "classType" },
+      { model: ClassStudent, as: "classStudent", include: [{ model: Account, as: "account" }] },
+      {
+        model: Attendance,
+        as: "attendance",
+        attributes: ["id", "classId", "studyDate", "status", "note"],
+        required: false,
+      },
+    ];
+    const order = [
+      ["status", "ASC"],
+      ["no", "ASC"],
+    ];
+
+    // "remaining" (remaining class time = registeredTimes - attendance count) isn't a
+    // stored column, so it can't be filtered/paginated in SQL directly. With the
+    // dataset size involved, fetch all rows matching the other filters, compute
+    // remaining in JS, then paginate the filtered result manually.
+    if (remaining) {
+      const allClasses = await Class.findAll({ where, order, include });
+      const filtered = allClasses.filter((item) => {
+        const remainingCount =
+          (item.registeredTimes || 0) - (item.attendance?.length || 0);
+        return remaining === "expiring"
+          ? remainingCount <= 2
+          : remainingCount > 2;
+      });
+
+      const total = filtered.length;
+      const paged = filtered.slice(offset, offset + parseInt(limit));
+
+      return res.status(200).json({
+        data: paged,
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limit),
+      });
     }
 
     // Get total count for pagination
@@ -93,21 +152,10 @@ exports.findAll = async (req, res) => {
 
     const classes = await Class.findAll({
       where,
-      order: [
-        ["status", "ASC"],
-        ["no", "ASC"],
-      ],
+      order,
       limit: parseInt(limit),
       offset: parseInt(offset),
-      include: [
-        { model: ClassStudy, as: "classStudy" },
-        { model: Account, as: "teacher", attributes: ["id", "name"] },
-        { 
-          model: Attendance, as: "attendance", 
-          attributes: ["id", "classId", "studyDate", "status", "note"],
-          required: false 
-        },
-      ],
+      include,
     });
 
     res.status(200).json({
