@@ -6,6 +6,10 @@ services:
     build:
       context: .
       dockerfile: dev.Dockerfile
+      args:
+        VITE_API_BASE_URL: https://api.goalchinesedoc.com/api
+        VITE_APP_API_IMAGE: https://api.goalchinesedoc.com/
+        VITE_APP_PDF_LICENSE: demo:1734577804655:7ea8e4310300000000c8233fd7af5b03b95ca487e4adb98e8228071952
     volumes:
       - ./src:/app/src
       - ./public:/app/public
