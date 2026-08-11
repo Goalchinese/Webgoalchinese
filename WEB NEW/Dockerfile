@@ -10,6 +10,13 @@ COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 # Copy the rest of the application code
 COPY . .
 
+ARG VITE_API_BASE_URL
+ARG VITE_APP_API_IMAGE
+ARG VITE_APP_PDF_LICENSE
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_APP_API_IMAGE=$VITE_APP_API_IMAGE
+ENV VITE_APP_PDF_LICENSE=$VITE_APP_PDF_LICENSE
+
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
   elif [ -f package-lock.json ]; then npm i; \
