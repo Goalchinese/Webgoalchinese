@@ -367,6 +367,7 @@ function getEvents() {
 }
 
 const calendarOptions = computed<CalendarOptions>(() => ({
+  locale: "th",
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
   initialView: "dayGridMonth",
   headerToolbar: false,

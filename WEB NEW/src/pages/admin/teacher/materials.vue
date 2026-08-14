@@ -68,13 +68,13 @@ const {
     </v-row>
     <v-row dense>
       <v-col cols="12">
-        <v-data-table
+        <v-data-table-server
           v-model="selectedTeacher"
           :headers="headers"
           :items="items"
           :loading="isLoadingTeachers"
-          :server-items-length="paginationTeachers.total"
-          v-model:options="paginationTeachers"
+          :items-length="paginationTeachers.total"
+          v-model:items-per-page="paginationTeachers.itemsPerPage"
           mobile-breakpoint="0"
           show-select
           item-value="id"
@@ -122,7 +122,7 @@ const {
             <StatusChip v-if="item.gender" type="gender" :value="item.gender" />
             <span v-else>-</span>
           </template>
-        </v-data-table>
+        </v-data-table-server>
       </v-col>
     </v-row>
   </v-card>
@@ -149,13 +149,13 @@ const {
     </v-row>
     <v-row dense>
       <v-col cols="12">
-        <v-data-table
+        <v-data-table-server
           v-model="selectedMaterials"
           :headers="headersMaterials"
           :items="itemsMaterials"
           :loading="isLoadingMaterials"
-          :server-items-length="paginationMaterials.total"
-          v-model:options="paginationMaterials"
+          :items-length="paginationMaterials.total"
+          v-model:items-per-page="paginationMaterials.itemsPerPage"
           show-select
           item-value="id"
           return-object
@@ -188,7 +188,7 @@ const {
           <template #item.documentType="{ item }">
             <StatusChip type="documentType" :value="item.documentType" label />
           </template>
-        </v-data-table>
+        </v-data-table-server>
       </v-col>
     </v-row>
   </v-card>

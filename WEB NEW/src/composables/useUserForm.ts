@@ -214,7 +214,7 @@ export function useUserForm(props: UserFormProps, emit: UserFormEmit) {
     {
       icon: "tabler-file-text",
       name: "Metrials Management",
-      link: "/admin/materials",
+      link: "/admin/materials/all",
       view: false,
       edit: false,
       delete: false,

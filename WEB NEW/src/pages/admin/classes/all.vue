@@ -131,14 +131,14 @@
 
     <VRow>
       <VCol>
-        <v-data-table
+        <v-data-table-server
           v-model="selectedClass"
-          v-model:options="pagination"
+          v-model:items-per-page="pagination.itemsPerPage"
           :headers="headers"
           :items="items"
           item-value="id"
           :loading="isLoading"
-          :server-items-length="pagination.total"
+          :items-length="pagination.total"
           show-select
           return-object
           :mobile-breakpoint="0"
@@ -168,7 +168,7 @@
           </template>
 
           <template #item.studyDay="{ item }">
-            <div v-for="(it, i) in item.classStudy" :key="i" class="py-1 mb-1">
+            <div v-for="(it, i) in item.classStudy" :key="i" class="mb-1">
               <StatusChip type="day" :value="it.day" rounded="lg" />
             </div>
           </template>
@@ -230,7 +230,7 @@
               </v-list>
             </v-menu>
           </template>
-        </v-data-table>
+        </v-data-table-server>
       </VCol>
     </VRow>
   </v-card>

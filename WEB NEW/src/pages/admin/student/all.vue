@@ -84,12 +84,12 @@
 
     <VRow>
       <VCol>
-        <v-data-table
-          v-model:options="pagination"
+        <v-data-table-server
+          v-model:items-per-page="pagination.itemsPerPage"
           :headers="headers"
           :items="items"
           :loading="isLoading"
-          :server-items-length="pagination.total"
+          :items-length="pagination.total"
           :mobile-breakpoint="0"
           @update:options="updatePagination"
         >
@@ -179,7 +179,7 @@
               </v-list>
             </v-menu>
           </template>
-        </v-data-table>
+        </v-data-table-server>
       </VCol>
     </VRow>
   </v-card>
