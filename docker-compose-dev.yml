@@ -3,35 +3,39 @@ version: '3.8'
 services:
   web:
     build:
-      context: ./WEB
+      context: "./WEB NEW"
       dockerfile: Dockerfile.dev
     ports:
-      - "8080:3000"
+      - "5173:5173"
     volumes:
-      - ./WEB/src:/app/src
-    develop:
-      watch:
-        - action: sync+restart
-          path: ./WEB
-          target: /app
-          ignore:
-            - node_modules
+      - ./WEB NEW/src:/app/src
+      - ./WEB NEW/public:/app/public
+      - /app/node_modules
     environment:
       - NODE_ENV=development
 
-api:
-    build: ./API
-    dockerfile: Dockerfile
+  api:
+    build:
+      context: ./API
+      dockerfile: Dockerfile.dev
     ports:
       - "3000:3000"
     depends_on:
       - db
     volumes:
       - ./API:/usr/src/app
+      - /app/node_modules
+      - ./API/uploads:/usr/src/app/uploads
+      - ./API/logs:/usr/src/app/logs    
     environment:
       - NODE_ENV=development
       - JWT_SECRET=your-secret-key-here
-    restart: always
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=my-strong-password
+      - DB_NAME=railway
+      - JWT_SECRET=your_jwt_secret
+      - DB_PORT=3306
 
   db:
     image: mysql
