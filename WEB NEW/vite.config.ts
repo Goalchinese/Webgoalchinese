@@ -102,4 +102,9 @@ export default defineConfig({
       './src/**/*.vue',
     ],
   },
+  server: {
+    watch: {
+      usePolling: true,
+    },
+  },
 })

@@ -21,6 +21,8 @@ type ChipType =
   | "documentType"
   | "gender"
   | "avaliableForClass"
+  | "day"
+  | "timeSlot"
 
 const props = withDefaults(
   defineProps<{
@@ -38,12 +40,12 @@ const props = withDefaults(
 
 const STUDENT_TYPE_MAP: Record<string, { color: string; icon: string }> = {
   Online: { color: "success", icon: "tabler-wifi" },
-  Offline: { color: "grey", icon: "tabler-school" },
+  Offline: { color: "error", icon: "tabler-wifi-off" },
 }
 
 const CLASS_TYPE_MAP: Record<string, { color: string; icon: string }> = {
-  Private: { color: "primary", icon: "tabler-user" },
-  Group: { color: "secondary", icon: "tabler-users" },
+  Private: { color: "primary", icon: "tabler-lock" },
+  Group: { color: "info", icon: "tabler-users" },
 }
 
 const STATUS_MAP: Record<string, { color: string; icon: string }> = {
@@ -53,13 +55,23 @@ const STATUS_MAP: Record<string, { color: string; icon: string }> = {
 
 const GENDER_MAP: Record<string, { color: string; icon: string }> = {
   Male: { color: "info", icon: "tabler-gender-male" },
-  Female: { color: "error", icon: "tabler-gender-female" },
+  Female: { color: "pink", icon: "tabler-gender-female" },
 }
 
 const AVALIABLE_FOR_CLASS_MAP: Record<string, { color: string; icon: string }> = {
   Kids: { color: "success", icon: "tabler-baby-carriage" },
   Adult: { color: "info", icon: "tabler-user" },
-  "Kids & Adult": { color: "secondary", icon: "tabler-users" },
+  "Kids & Adult": { color: "primary", icon: "tabler-users" },
+}
+
+const DAY_MAP: Record<string, { color: string; icon: string }> = {
+  Mon: { color: "warning", icon: "" },
+  Tue: { color: "pink", icon: "" },
+  Wed: { color: "success", icon: "" },
+  Thu: { color: "orange", icon: "" },
+  Fri: { color: "info", icon: "" },
+  Sat: { color: "purple", icon: "" },
+  Sun: { color: "error", icon: "" },
 }
 
 const DOCUMENT_TYPE_MAP: Record<string, { color: string; icon: string }> = {
@@ -72,25 +84,39 @@ const DOCUMENT_TYPE_MAP: Record<string, { color: string; icon: string }> = {
   image: { color: "success", icon: "tabler-photo" },
 }
 
-const MAP_BY_TYPE: Record<ChipType, Record<string, { color: string; icon: string }>> = {
+const MAP_BY_TYPE: Partial<Record<ChipType, Record<string, { color: string; icon: string }>>> = {
   studentType: STUDENT_TYPE_MAP,
   classType: CLASS_TYPE_MAP,
   status: STATUS_MAP,
   documentType: DOCUMENT_TYPE_MAP,
   gender: GENDER_MAP,
   avaliableForClass: AVALIABLE_FOR_CLASS_MAP,
+  day: DAY_MAP,
+}
+
+// timeSlot value looks like "09:00 - 10:00" — bucket by start hour instead of an exact-string map
+function timeSlotMeta(value: string): { color: string; icon: string } {
+  const startHour = Number(value.split(":")[0])
+
+  if (Number.isNaN(startHour)) return { color: "grey", icon: "" }
+  if (startHour < 12) return { color: "info", icon: "" }
+  if (startHour < 17) return { color: "warning", icon: "" }
+  if (startHour < 21) return { color: "purple", icon: "" }
+
+  return { color: "indigo", icon: "" }
 }
 
 const meta = computed(() => {
-  const map = MAP_BY_TYPE[props.type]
   const key = props.value ?? ""
 
-  return (
-    map[key] ??
-    (props.type === "documentType"
-      ? map[key.toLowerCase()]
-      : undefined) ?? { color: "grey", icon: "tabler-tag" }
+  if (props.type === "timeSlot") return timeSlotMeta(key)
+
+  const map = MAP_BY_TYPE[props.type] ?? {}
+  const matchedKey = Object.keys(map).find(
+    (mapKey) => mapKey.toLowerCase() === key.toLowerCase()
   )
+
+  return (matchedKey ? map[matchedKey] : undefined) ?? { color: "grey", icon: "tabler-tag" }
 })
 
 const color = computed(() => meta.value.color)

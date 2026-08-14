@@ -88,12 +88,12 @@
 
       <v-row>
         <v-col>
-          <v-data-table
-            v-model:options="pagination"
+          <v-data-table-server
+            v-model:items-per-page="pagination.itemsPerPage"
             :headers="headers"
             :items="items"
             :loading="isLoading"
-            :server-items-length="pagination.total"
+            :items-length="pagination.total"
             :mobile-breakpoint="0"
             @update:options="updatePagination"
           >
@@ -165,7 +165,7 @@
                 />
               </div>
             </template>
-          </v-data-table>
+          </v-data-table-server>
         </v-col>
       </v-row>
     </v-card-text>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import axios from "axios";
 import { useSwal } from "@/composables/useSwal";
 import Calendar from "@/components/Calendar.vue";
@@ -7,21 +7,24 @@ import Calendar from "@/components/Calendar.vue";
 const { showApiError } = useSwal();
 const events = ref<unknown[]>([]);
 
-const onFetchEvents = async (branchId?: string) => {
-  events.value = [];
+const onFetchEvents = async (payload?: {
+  branchId?: string;
+  start?: string;
+  end?: string;
+}) => {
   try {
-    const { data } = await axios.get(
-      `/classEvents${branchId ? `?branchId=${branchId}` : ""}`,
-    );
+    const { data } = await axios.get("/classEvents", {
+      params: {
+        branchId: payload?.branchId,
+        start: payload?.start,
+        end: payload?.end,
+      },
+    });
     events.value = data || [];
   } catch (error) {
     showApiError(error);
   }
 };
-
-onMounted(() => {
-  onFetchEvents();
-});
 </script>
 
 <template>
