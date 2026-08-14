@@ -701,7 +701,7 @@ onMounted(() => {
           <VSpacer />
           <VMenu v-if="isAdmin">
             <template #activator="{ props: menuProps }">
-              <VBtn icon size="small" v-bind="menuProps">
+              <VBtn icon size="small" v-bind="menuProps" variant="flat">
                 <VIcon>tabler-dots-vertical</VIcon>
               </VBtn>
             </template>
