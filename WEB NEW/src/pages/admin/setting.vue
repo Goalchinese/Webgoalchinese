@@ -18,20 +18,31 @@
           <label class="v-label text-body-small font-weight-bold mb-2 d-block">
             Upload School Logo
           </label>
-          <v-avatar rounded="lg" size="120" class="border border-1 border-light">
+          <v-avatar rounded="lg" size="120" class="">
             <v-img v-if="formInput.logo" :src="formInput.logo" cover />
             <span v-else class="text-white text-h6">logo</span>
           </v-avatar>
           <div class="mt-2">
             <v-file-input
-              v-if="userInfo?.role === 'superadmin'"
               v-model="formInput.file"
+              ref="refInputFile"
               density="compact"
               variant="outlined"
               hide-details
               accept="image/*"
               label="Choose a file..."
+              class="d-none"
             />
+            <v-btn
+              v-if="userInfo?.role === 'superadmin'"
+              color="primary"
+              class="text-none mt-1"
+              prepend-icon="tabler-upload"
+              @click="refInputFile?.click()"              
+              density="compact"
+            >
+              Upload
+            </v-btn>
             <v-btn
               v-if="userInfo?.role === 'superadmin'"
               color="error"
@@ -41,8 +52,8 @@
               :loading="isSaving"
               :disabled="isSaving"
               @click="deleteLogo"
+              icon="tabler-trash"
             >
-              Remove Logo
             </v-btn>
           </div>
         </v-col>
@@ -215,6 +226,9 @@
 import { useRoute } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
 import { useSetting, TAG_CATEGORIES } from "@/composables/useSetting";
+import { ref } from "vue";
+
+const refInputFile = ref();
 
 const { userInfo } = useAuth();
 const route = useRoute();

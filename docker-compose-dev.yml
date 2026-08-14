@@ -5,6 +5,10 @@ services:
     build:
       context: "./WEB NEW"
       dockerfile: Dockerfile.dev
+      args:
+        VITE_API_BASE_URL: http://localhost:3000/api
+        VITE_APP_API_IMAGE: http://localhost:3000/
+        VITE_APP_PDF_LICENSE: demo:1734577804655:7ea8e4310300000000c8233fd7af5b03b95ca487e4adb98e8228071952
     ports:
       - "5173:5173"
     volumes:

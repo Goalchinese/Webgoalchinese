@@ -12,14 +12,6 @@ const ClassEvents = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    startDate: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    endDate: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
     link: {
       type: DataTypes.STRING,
     },
@@ -39,9 +31,6 @@ const ClassEvents = sequelize.define(
     indexes: [
       { fields: ["classId"] },
       { fields: ["updateBy"] },
-      { fields: ["startDate", "endDate"] },
-      { fields: ["startDate"] },
-      { fields: ["classId", "startDate"] },
     ],
   }
 );
@@ -56,6 +45,12 @@ ClassEvents.associate = (models) => {
   ClassEvents.belongsTo(models.Class, {
     foreignKey: "classId",
     as: "class",
+    onDelete: "cascade",
+    hooks: true,
+  });
+  ClassEvents.hasMany(models.ClassEventDates, {
+    foreignKey: "eventId",
+    as: "dates",
     onDelete: "cascade",
     hooks: true,
   });

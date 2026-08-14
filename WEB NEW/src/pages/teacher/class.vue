@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import axios from "axios";
 import { useAuth } from "@/composables/useAuth";
 import { useSwal } from "@/composables/useSwal";
@@ -25,20 +25,20 @@ const { userInfo } = useAuth();
 const { showApiError } = useSwal();
 const events = ref<any[]>([]);
 
-const onFetchEvents = async () => {
+const onFetchEvents = async (payload?: { start?: string; end?: string }) => {
   try {
-    const { data } = await axios.get(
-      `/classEvents?teacherId=${userInfo.value?.accountID}`,
-    );
+    const { data } = await axios.get("/classEvents", {
+      params: {
+        teacherId: userInfo.value?.accountID,
+        start: payload?.start,
+        end: payload?.end,
+      },
+    });
     events.value = data || [];
   } catch (error) {
     showApiError(error);
   }
 };
-
-onMounted(() => {
-  onFetchEvents();
-});
 </script>
 
 <style lang="scss" scoped></style>

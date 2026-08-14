@@ -30,12 +30,16 @@ export function useStudentClassPage() {
   const totalLeaveTimes = ref(0);
   const studentLeaveTimes = ref(0);
 
-  const onFetchEvents = async () => {
+  const onFetchEvents = async (payload?: { start?: string; end?: string }) => {
     try {
       const userInfo = currentUser.value;
-      const { data } = await axios.get(
-        `/classEvents?studentId=${userInfo.accountID}`
-      );
+      const { data } = await axios.get("/classEvents", {
+        params: {
+          studentId: userInfo.accountID,
+          start: payload?.start,
+          end: payload?.end,
+        },
+      });
       events.value = data || [];
     } catch (error) {
       showApiError(error);
