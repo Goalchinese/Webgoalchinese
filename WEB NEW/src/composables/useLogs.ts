@@ -26,7 +26,7 @@ export function useLogs() {
         const logFileName = `app-${dateString}.log`;
 
         try {
-          const response = await fetch(`${baseUrl.value}logs/${logFileName}`);
+          const response = await fetch(`${baseUrl.value}/logs/${logFileName}`);
 
           if (response.ok) {
             const logContentText = await response.text();
