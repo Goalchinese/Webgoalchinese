@@ -8,6 +8,7 @@ import type { CalendarApi, CalendarOptions } from "@fullcalendar/core";
 import Swal from "sweetalert2";
 import { axios } from "@/plugins/axios";
 import { useAuth } from "@/composables/useAuth";
+import { watch, ref, computed } from "vue";
 
 const props = defineProps<{
   eventsItems: any[];
@@ -15,7 +16,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  fetchEvents: [branchId?: string];
+  fetchEvents: [payload?: { branchId?: string; start?: string; end?: string }];
 }>();
 
 const { userInfo } = useAuth();
@@ -48,6 +49,16 @@ const events = ref<any[]>([]);
 const dialog = ref(false);
 const dialogCopyClass = ref(false);
 const selectedDate = ref<string[]>([]);
+
+const currentRange = reactive({ start: "", end: "" });
+
+function emitFetchEvents() {
+  emit("fetchEvents", {
+    branchId: branch.value || undefined,
+    start: currentRange.start,
+    end: currentRange.end,
+  });
+}
 
 const calendarsColor = {
   primary: "primary",
@@ -105,7 +116,7 @@ async function fetchOption() {
   try {
     const { data: dataClass } = await axios.get("/classes?limit=1000");
 
-    itemsOptions.class = dataClass.data || dataClass;
+    itemsOptions.class = dataClass.data;
 
     const { data: dataBranch } = await axios.get("/branch");
 
@@ -178,18 +189,23 @@ async function createClassEvent() {
 
       response = await axios.post("/classEvents", body);
     } else {
+      const eventId = selectedEvent.value?.eventId;
+      const dateId = selectedEvent.value?.id;
+
       const body = {
         ...formInput,
         classId: selectedClass.value.id,
-        startDate: `${formInput.startDate.substring(0, 10)} ${formInput.startTime}`,
-        endDate: `${formInput.endDate.substring(0, 10)} ${formInput.endTime}`,
         updateBy: userInfo.value?.accountID,
       };
 
-      response = await axios.put(
-        `/classEvents/${selectedEvent.value?.id}`,
-        body,
-      );
+      // Shared fields (title/link/color/note) edit here updates every day of this event
+      response = await axios.put(`/classEvents/${eventId}`, body);
+
+      // Reschedule only this specific day
+      await axios.put(`/classEvents/${eventId}/dates/${dateId}`, {
+        startDate: `${formInput.startDate.substring(0, 10)} ${formInput.startTime}`,
+        endDate: `${formInput.endDate.substring(0, 10)} ${formInput.endTime}`,
+      });
     }
 
     Swal.fire(response?.data?.message, "", "success");
@@ -197,7 +213,7 @@ async function createClassEvent() {
     dialog.value = false;
     selectedOpen.value = false;
 
-    emit("fetchEvents");
+    emitFetchEvents();
   } catch (error) {
     showApiError(error);
   }
@@ -206,7 +222,7 @@ async function createClassEvent() {
 async function copyClassEvent() {
   try {
     const { data } = await axios.post(
-      `/classEvents/copy/${selectedEvent.value.id}`,
+      `/classEvents/${selectedEvent.value.eventId}/dates`,
       {
         dates: selectedDate.value?.map((date) => new Date(date).toISOString().substring(0, 10)),
       },
@@ -215,7 +231,7 @@ async function copyClassEvent() {
     Swal.fire(data?.message, "", "success");
     dialogCopyClass.value = false;
     selectedDate.value = [];
-    emit("fetchEvents");
+    emitFetchEvents();
   } catch (error) {
     console.error("Error copying class event:", error);
     showApiError(error);
@@ -230,7 +246,7 @@ function eventTimeLabel(event: any) {
   if (!event?.start) return "";
   try {
     return new Date(event.start).toLocaleTimeString("en-US", {
-      hourCycle: "h23",
+      hour12: false,
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -324,8 +340,8 @@ function formatDateTime(date: Date, timeZone = "UTC") {
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
-    hourCycle: "h23",
     timeZone,
+    hour12: false,
   };
 
   return new Intl.DateTimeFormat("en-CA", options)
@@ -351,6 +367,12 @@ function getEvents() {
 }
 
 const calendarOptions = computed<CalendarOptions>(() => ({
+
+  eventTimeFormat: {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  },
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
   initialView: "dayGridMonth",
   headerToolbar: false,
@@ -413,6 +435,15 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   },
   datesSet(info) {
     calendarTitle.value = info.view.title;
+
+    const start = formatDateTime(info.view.activeStart).substring(0, 10);
+    const end = formatDateTime(info.view.activeEnd).substring(0, 10);
+
+    if (start === currentRange.start && end === currentRange.end) return;
+
+    currentRange.start = start;
+    currentRange.end = end;
+    emitFetchEvents();
   },
 }));
 
@@ -475,12 +506,12 @@ async function onDeleteEvent() {
 
   try {
     const { data } = await axios.delete(
-      `/classEvents/${selectedEvent.value.id}`,
+      `/classEvents/${selectedEvent.value.eventId}/dates/${selectedEvent.value.id}`,
     );
 
     Swal.fire(data?.message, "", "success");
     selectedEvent.value = {};
-    emit("fetchEvents");
+    emitFetchEvents();
   } catch (error) {
     showApiError(error);
   }
@@ -505,8 +536,8 @@ watch(
   { immediate: true },
 );
 
-watch(branch, (val) => {
-  if (val) emit("fetchEvents", val);
+watch(branch, () => {
+  emitFetchEvents();
 });
 
 watch(dialog, (val) => {
@@ -676,7 +707,7 @@ onMounted(() => {
           <VSpacer />
           <VMenu v-if="isAdmin">
             <template #activator="{ props: menuProps }">
-              <VBtn icon size="small" v-bind="menuProps">
+              <VBtn icon size="small" v-bind="menuProps" variant="flat">
                 <VIcon>tabler-dots-vertical</VIcon>
               </VBtn>
             </template>

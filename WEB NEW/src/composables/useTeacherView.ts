@@ -44,11 +44,15 @@ export function useTeacherView() {
     }
   };
 
-  const onFetchEvents = async () => {
+  const onFetchEvents = async (payload?: { start?: string; end?: string }) => {
     try {
-      const { data } = await axios.get(
-        `/classEvents?teacherId=${route.params.id}`
-      );
+      const { data } = await axios.get("/classEvents", {
+        params: {
+          teacherId: route.params.id,
+          start: payload?.start,
+          end: payload?.end,
+        },
+      });
       events.value = data || [];
     } catch (error) {
       showApiError(error);
@@ -60,8 +64,6 @@ export function useTeacherView() {
       fetchDataById();
     } else if (val === 1) {
       fetchDataMaterials();
-    } else if (val === 2) {
-      onFetchEvents();
     }
   });
 

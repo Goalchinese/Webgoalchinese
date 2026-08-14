@@ -131,14 +131,14 @@
 
     <VRow>
       <VCol>
-        <v-data-table
+        <v-data-table-server
           v-model="selectedClass"
-          v-model:options="pagination"
+          v-model:items-per-page="pagination.itemsPerPage"
           :headers="headers"
           :items="items"
           item-value="id"
           :loading="isLoading"
-          :server-items-length="pagination.total"
+          :items-length="pagination.total"
           show-select
           return-object
           :mobile-breakpoint="0"
@@ -150,14 +150,7 @@
             </v-chip>
           </template>
           <template #item.classType="{ item }">
-            <v-chip
-              size="small"
-              rounded="lg"
-              :color="item.classType?.name === 'Private' ? 'info' : 'secondary'"
-              variant="tonal"
-            >
-              {{ item.classType?.name }}
-            </v-chip>
+               <StatusChip type="classType" :value="item.classType?.name" rounded="lg" />
           </template>
 
           <template #item.startDate="{ item }">
@@ -175,18 +168,14 @@
           </template>
 
           <template #item.studyDay="{ item }">
-            <div v-for="(it, i) in item.classStudy" :key="i">
-              <v-chip size="small" rounded="lg" color="primary" variant="tonal">
-                {{ it.day }}
-              </v-chip>
+            <div v-for="(it, i) in item.classStudy" :key="i" class="mb-1">
+              <StatusChip type="day" :value="it.day" rounded="lg" />
             </div>
           </template>
 
           <template #item.timeSlot="{ item }">
-            <div v-for="(it, i) in item.classStudy" :key="i">
-              <v-chip size="small" rounded="lg" color="primary" variant="tonal">
-                {{ it.startTime }} - {{ it.endTime }}
-              </v-chip>
+            <div v-for="(it, i) in item.classStudy" :key="i" class="mb-1">
+              <StatusChip type="timeSlot" :value="`${it.startTime} - ${it.endTime}`" rounded="lg" />
             </div>
           </template>
 
@@ -241,7 +230,7 @@
               </v-list>
             </v-menu>
           </template>
-        </v-data-table>
+        </v-data-table-server>
       </VCol>
     </VRow>
   </v-card>

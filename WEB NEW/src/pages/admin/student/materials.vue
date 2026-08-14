@@ -39,14 +39,14 @@
       </v-col>
     </v-row>
 
-    <v-data-table
+    <v-data-table-server
       v-model="entities.selected.value"
-      v-model:options="entities.pagination"
+      v-model:items-per-page="entities.pagination.itemsPerPage"
       :headers="entityHeaders"
       :items="entities.items.value"
       item-key="id"
       :loading="entities.isLoading.value"
-      :server-items-length="entities.pagination.total"
+      :items-length="entities.pagination.total"
       show-select
       :mobile-breakpoint="0"
       class="mt-4"
@@ -95,7 +95,7 @@
       <template #item.points="{ item }">
         {{ item.pointStructure?.pointAfterUpdate || 0 }}
       </template>
-    </v-data-table>
+    </v-data-table-server>
   </v-card>
 
   <v-card rounded="lg" elevation="1" class="pa-4">
@@ -129,14 +129,14 @@
       </v-col>
     </v-row>
 
-    <v-data-table
+    <v-data-table-server
       v-model="materials.selected.value"
-      v-model:options="materials.pagination"
+      v-model:items-per-page="materials.pagination.itemsPerPage"
       :headers="materialHeaders"
       :items="materials.items.value"
       item-key="id"
       :loading="materials.isLoading.value"
-      :server-items-length="materials.pagination.total"
+      :items-length="materials.pagination.total"
       show-select
       :mobile-breakpoint="0"
       class="mt-4"
@@ -163,7 +163,7 @@
       <template #item.documentType="{ item }">
         <StatusChip type="documentType" :value="item.documentType" label />
       </template>
-    </v-data-table>
+    </v-data-table-server>
   </v-card>
 
   <v-row justify="end" class="mt-4">

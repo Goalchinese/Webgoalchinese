@@ -105,15 +105,20 @@ exports.findAll = async (req, res) => {
     }
 
     const include = [
-      { model: ClassStudy, as: "classStudy" },
+      { model: ClassStudy, as: "classStudy", separate: true },
       { model: Account, as: "teacher", attributes: ["id", "name"] },
       { model: ClassType, as: "classType" },
-      { model: ClassStudent, as: "classStudent", include: [{ model: Account, as: "account" }] },
+      {
+        model: ClassStudent,
+        as: "classStudent",
+        separate: true,
+        include: [{ model: Account, as: "account" }],
+      },
       {
         model: Attendance,
         as: "attendance",
         attributes: ["id", "classId", "studyDate", "status", "note"],
-        required: false,
+        separate: true,
       },
     ];
     const order = [

@@ -1,5 +1,6 @@
 const {
   ClassEvents,
+  ClassEventDates,
   Account,
   Class,
   ClassStudent,
@@ -19,18 +20,42 @@ const clearEventsCache = () => {
   console.log('Events cache cleared');
 };
 
-// Create a new Class Event
+// Create a new Class Event (with one or many days)
 exports.create = async (req, res) => {
   try {
-    const newEvent = await ClassEvents.create(req.body);
-    // Clear cache after creating event
+    const { classId, title, link, color, note, dates, startDate, endDate } =
+      req.body;
+
+    const newEvent = await ClassEvents.create({
+      classId,
+      title,
+      link,
+      color,
+      note,
+      updateBy: req.user.accountID,
+    });
+
+    // Accept either `dates: [{startDate,endDate}]` or a single startDate/endDate pair
+    const dayEntries = Array.isArray(dates) && dates.length
+      ? dates
+      : [{ startDate, endDate }];
+
+    const createdDates = await ClassEventDates.bulkCreate(
+      dayEntries.map((d) => ({
+        eventId: newEvent.id,
+        startDate: d.startDate,
+        endDate: d.endDate,
+      }))
+    );
+
     clearEventsCache();
-    res
-      .status(201)
-      .json({ message: "Event created successfully", data: newEvent });
+    res.status(201).json({
+      message: "Event created successfully",
+      data: { ...newEvent.toJSON(), dates: createdDates },
+    });
 
     logger.info(
-      `Event created: ${newEvent.id} ${req.body.title} by [${req.user.id}]${req.user.username}`
+      `Event created: ${newEvent.id} ${title} by [${req.user.id}]${req.user.username}`
     );
   } catch (error) {
     res
@@ -39,8 +64,8 @@ exports.create = async (req, res) => {
   }
 };
 
-// create a new Class Event by Copying an existing event
-exports.copy = async (req, res) => {
+// Add extra days to an existing event (was "copy")
+exports.addDates = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -49,53 +74,101 @@ exports.copy = async (req, res) => {
       return res.status(404).json({ message: "Event not found" });
     }
     const { dates } = req.body;
+    if (!Array.isArray(dates) || !dates.length) {
+      return res.status(400).json({ message: "dates array is required" });
+    }
 
-    const { classId, title, link, color, note, startDate, endDate } =
-      event.toJSON();
+    const referenceDate = await ClassEventDates.findOne({
+      where: { eventId: id },
+      order: [["startDate", "ASC"]],
+    });
 
-    await ClassEvents.bulkCreate(
+    const refStart = referenceDate ? referenceDate.startDate : new Date();
+    const refEnd = referenceDate ? referenceDate.endDate : new Date();
+
+    const createdDates = await ClassEventDates.bulkCreate(
       dates.map((date) => ({
-        id: null,
-        classId: classId,
-        title: title,
-        link: link,
-        color: color,
-        note: note,
-        startDate: `${date} ${new Date(startDate).toLocaleTimeString("en-US", {
+        eventId: id,
+        startDate: `${date} ${new Date(refStart).toLocaleTimeString("en-US", {
           hour: "2-digit",
           minute: "2-digit",
         })}`,
-        endDate: `${date} ${new Date(endDate).toLocaleTimeString("en-US", {
+        endDate: `${date} ${new Date(refEnd).toLocaleTimeString("en-US", {
           hour: "2-digit",
           minute: "2-digit",
         })}`,
-        updateBy: req.user.accountID,
       }))
     );
-    // Clear cache after copying events
+
     clearEventsCache();
-    res.status(201).json({ message: "Event created successfully" });
+    res
+      .status(201)
+      .json({ message: "Dates added successfully", data: createdDates });
 
     logger.info(
-      `Event Copy created: ${id}} by [${req.user.id}]${req.user.username}`
+      `Event dates added: ${id} by [${req.user.id}]${req.user.username}`
     );
   } catch (error) {
-    console.log("🚀 ~ exports.copy= ~ error:", error);
+    console.log("addDates error:", error);
     res
       .status(400)
-      .json({ message: "Error creating event", error: error.message });
+      .json({ message: "Error adding dates", error: error.message });
   }
 };
 
-// Retrieve all Class Events
+// Update a single day's start/end time
+exports.updateDate = async (req, res) => {
+  try {
+    const { eventId, dateId } = req.params;
+    const { startDate, endDate } = req.body;
+
+    const [updated] = await ClassEventDates.update(
+      { startDate, endDate },
+      { where: { id: dateId, eventId } }
+    );
+    if (!updated) {
+      return res.status(404).json({ message: "Event date not found" });
+    }
+    clearEventsCache();
+    const updatedDate = await ClassEventDates.findByPk(dateId);
+    res
+      .status(200)
+      .json({ message: "Event date updated successfully", data: updatedDate });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: "Error updating event date", error: error.message });
+  }
+};
+
+// Delete a single day from an event
+exports.deleteDate = async (req, res) => {
+  try {
+    const { eventId, dateId } = req.params;
+    const deleted = await ClassEventDates.destroy({
+      where: { id: dateId, eventId },
+    });
+    if (!deleted) {
+      return res.status(404).json({ message: "Event date not found" });
+    }
+    clearEventsCache();
+    res.status(200).json({ message: "Event date deleted successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error deleting event date", error: error.message });
+  }
+};
+
+// Retrieve all Class Events, flattened to one entry per day for the calendar
 exports.findAll = async (req, res) => {
   try {
-    const { branchId, teacherId, studentId } = req.query;
-    
+    const { branchId, teacherId, studentId, start, end } = req.query;
+
     // Create cache key based on filters
-    const cacheKey = `events-${branchId || 'all'}-${teacherId || 'all'}-${studentId || 'all'}`;
+    const cacheKey = `events-${branchId || 'all'}-${teacherId || 'all'}-${studentId || 'all'}-${start || 'all'}-${end || 'all'}`;
     console.log(`Cache key: ${cacheKey}`);
-    
+
     // Check cache first
     const cached = eventsCache.get(cacheKey);
     if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
@@ -103,82 +176,100 @@ exports.findAll = async (req, res) => {
       return res.status(200).json(cached.data);
     }
 
-    // TEMPORARY: Use simple query to fix calendar issue
     eventsCache.clear();
-    console.log("Cache cleared - using simple query for calendar");
 
-    // Filter events from current year onwards (exclude old years)
-    const currentYear = new Date().getFullYear();
-    const startOfCurrentYear = new Date(currentYear, 0, 1); // Jan 1st of current year
+    // Restrict to the visible calendar range when given, otherwise fall back
+    // to current-year-onwards so callers that don't pass a range still work.
+    const dateWhere = start && end
+      ? {
+          startDate: { [Sequelize.Op.lte]: new Date(end) },
+          endDate: { [Sequelize.Op.gte]: new Date(start) },
+        }
+      : {
+          startDate: {
+            [Sequelize.Op.gte]: new Date(new Date().getFullYear(), 0, 1),
+          },
+        };
 
-    const events = await ClassEvents.findAll({
-      where: {
-        startDate: {
-          [Sequelize.Op.gte]: startOfCurrentYear,
-        },
-      },
-      attributes: [
-        "id",
-        "classId",
-        "title",
-        "link",
-        "color",
-        "note",
-        "startDate",
-        "endDate",
-        "updateBy",
-        "updatedAt",
-        "createdAt",
-      ],
+    const eventDates = await ClassEventDates.findAll({
+      where: dateWhere,
+      attributes: ["id", "eventId", "startDate", "endDate"],
       include: [
         {
-          model: Class,
-          as: "class",
-          attributes: ["id", "name", "no", "studyPlatform", "link"],
-          where: branchId ? { branchId } : undefined, // Filter by branchId if provided
-          required: !!(branchId || teacherId || studentId),
+          model: ClassEvents,
+          as: "event",
+          attributes: [
+            "id",
+            "classId",
+            "title",
+            "link",
+            "color",
+            "note",
+            "updateBy",
+            "updatedAt",
+            "createdAt",
+          ],
+          required: true,
           include: [
             {
-              model: Account,
-              as: "teacher",
-              attributes: ["id", "name"],
-              where: teacherId ? { id: teacherId } : undefined, // Filter by teacherId if provided
-              required: !!teacherId,
-            },
-            {
-              model: ClassStudent,
-              as: "classStudent",
-              where: studentId ? { accountID: studentId } : undefined, // Filter by studentId if provided
-              required: !!studentId,
+              model: Class,
+              as: "class",
+              attributes: ["id", "name", "no", "studyPlatform", "link"],
+              where: branchId ? { branchId } : undefined,
+              required: !!(branchId || teacherId || studentId),
               include: [
                 {
                   model: Account,
-                  as: "account",
+                  as: "teacher",
                   attributes: ["id", "name"],
+                  where: teacherId ? { id: teacherId } : undefined,
+                  required: !!teacherId,
+                },
+                {
+                  model: ClassStudent,
+                  as: "classStudent",
+                  where: studentId ? { accountID: studentId } : undefined,
+                  required: !!studentId,
+                  include: [
+                    {
+                      model: Account,
+                      as: "account",
+                      attributes: ["id", "name"],
+                    },
+                  ],
                 },
               ],
             },
+            {
+              model: Account,
+              as: "updatedBy",
+              attributes: ["id", "name"],
+            },
           ],
-        },
-        {
-          model: Account,
-          as: "updatedBy",
-          attributes: ["id", "name"],
         },
       ],
       order: [["startDate", "ASC"]],
     });
 
-    console.log(`Found ${events.length} events from year ${currentYear} onwards`);
+    // Flatten: each day becomes its own calendar entry, but keeps eventId
+    // so editing title/link/color/note updates every day at once.
+    const events = eventDates.map((ed) => {
+      const { event, ...dateFields } = ed.toJSON();
+      return {
+        ...event,
+        ...dateFields,
+        id: ed.id, // day id (per-occurrence)
+        eventId: event.id, // shared event id (edit-once target)
+      };
+    });
 
-    // Cache the result
+    console.log(`Found ${events.length} event days for range ${start || 'default'} - ${end || 'default'}`);
+
     eventsCache.set(cacheKey, {
       data: events,
       timestamp: Date.now(),
     });
 
-    console.log("Class events cached for 30 seconds");
-    console.log(`Found ${events.length} events total`);
     res.status(200).json(events);
   } catch (error) {
     console.error('Error in findAll:', error);
@@ -188,11 +279,13 @@ exports.findAll = async (req, res) => {
   }
 };
 
-// Retrieve a single Class Event by ID
+// Retrieve a single Class Event by ID, with all its days
 exports.findOne = async (req, res) => {
   try {
     const { id } = req.params;
-    const event = await ClassEvents.findByPk(id);
+    const event = await ClassEvents.findByPk(id, {
+      include: [{ model: ClassEventDates, as: "dates" }],
+    });
     if (!event) {
       return res.status(404).json({ message: "Event not found" });
     }
@@ -204,23 +297,30 @@ exports.findOne = async (req, res) => {
   }
 };
 
-// Update a Class Event by ID
+// Update a Class Event's shared fields (title/link/color/note/classId) by ID
+// Editing here updates every day belonging to this event at once.
 exports.update = async (req, res) => {
   try {
     const { id } = req.params;
-    const [updated] = await ClassEvents.update(req.body, { where: { id } });
+    const { classId, title, link, color, note } = req.body;
+
+    const [updated] = await ClassEvents.update(
+      { classId, title, link, color, note, updateBy: req.user.accountID },
+      { where: { id } }
+    );
     if (!updated) {
       return res.status(404).json({ message: "Event not found" });
     }
-    // Clear cache after updating event
     clearEventsCache();
-    const updatedEvent = await ClassEvents.findByPk(id);
+    const updatedEvent = await ClassEvents.findByPk(id, {
+      include: [{ model: ClassEventDates, as: "dates" }],
+    });
     res
       .status(200)
       .json({ message: "Event updated successfully", data: updatedEvent });
 
     logger.info(
-      `Event updated: ${id} ${req.body.title} by [${req.user.id}]${req.user.username}`
+      `Event updated: ${id} ${title} by [${req.user.id}]${req.user.username}`
     );
   } catch (error) {
     res
@@ -229,7 +329,7 @@ exports.update = async (req, res) => {
   }
 };
 
-// Delete a Class Event by ID
+// Delete a Class Event (and all its days) by ID
 exports.delete = async (req, res) => {
   try {
     const { id } = req.params;
@@ -237,7 +337,6 @@ exports.delete = async (req, res) => {
     if (!deleted) {
       return res.status(404).json({ message: "Event not found" });
     }
-    // Clear cache after deleting event
     clearEventsCache();
     res.status(204).send({ message: "Event deleted successfully" });
 
