@@ -629,13 +629,14 @@ onMounted(() => {
       offset-x
     >
       <VCard min-width="450px" flat>
-        <VCardTitle>
+        <VCardTitle class="d-flex align-center">
           {{ dateToYMD(selectedEventDay?.date) }}
           <VSpacer />
+          
           <VBtn
             v-if="isAdmin && (userInfo?.role !== 'user' || permission?.create)"
             color="primary"
-            size="x-small"
+            size="small"
             icon
             @click.stop="openDialog"
           >
@@ -703,7 +704,7 @@ onMounted(() => {
       offset-x
     >
       <VCard width="350px" flat>
-        <VCardTitle class="pb-0">
+        <VCardTitle class="pb-0 d-flex align-center">
           <VSpacer />
           <VMenu v-if="isAdmin">
             <template #activator="{ props: menuProps }">
