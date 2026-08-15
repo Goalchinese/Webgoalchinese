@@ -11,7 +11,7 @@ import { AppContentLayoutNav, ContentWidth, FooterType, NavbarType } from '@layo
 export const { themeConfig, layoutConfig } = defineThemeConfig({
   app: {
     title: 'goal chinese',
-    logo: h('div', { innerHTML: logo, style: 'line-height:0; color: rgb(var(--v-global-theme-primary))' }),
+    logo: h('div', { innerHTML: logo }),
     contentWidth: ContentWidth.Boxed,
     contentLayoutNav: AppContentLayoutNav.Vertical,
     overlayNavFromBreakpoint: breakpointsVuetify.md + 16, // 16 for scrollbar. Docs: https://next.vuetifyjs.com/en/features/display-and-platform/
