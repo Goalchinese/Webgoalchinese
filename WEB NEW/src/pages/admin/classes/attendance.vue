@@ -34,17 +34,17 @@
       :items="items"
     >
       <template #item.studyDay="{ item }">
-        <v-row dense v-for="(it, i) in item.classStudy" :key="i">
-          <v-chip size="small" rounded="lg" color="primary" variant="tonal">
-            {{ it.day }}
-          </v-chip>
-        </v-row>
+        <div v-for="(it, i) in item.classStudy" :key="i" class="mb-1">
+          <StatusChip type="day" :value="it.day" rounded="lg" />
+        </div>
       </template>
       <template #item.timeSlot="{ item }">
-        <div v-for="(it, i) in item.classStudy" :key="i">
-          <v-chip size="small" rounded="lg" color="primary" variant="tonal">
-            {{ it.startTime }} - {{ it.endTime }}
-          </v-chip>
+        <div v-for="(it, i) in item.classStudy" :key="i" class="mb-1">
+          <StatusChip
+            type="timeSlot"
+            :value="`${it.startTime} - ${it.endTime}`"
+            rounded="lg"
+          />
         </div>
       </template>
 
@@ -172,7 +172,7 @@
                     :color="status.color"
                     :value="status.value"
                   ></v-radio>
-                  <v-chip inline  :color="status.color"></v-chip>
+                  <v-chip inline :color="status.color"></v-chip>
                 </div>
               </template>
             </v-radio-group>

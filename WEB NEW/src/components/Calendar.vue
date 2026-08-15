@@ -224,7 +224,13 @@ async function copyClassEvent() {
     const { data } = await axios.post(
       `/classEvents/${selectedEvent.value.eventId}/dates`,
       {
-        dates: selectedDate.value?.map((date) => new Date(date).toISOString().substring(0, 10)),
+        dates: selectedDate.value?.map((date) => {
+          const d = new Date(date);
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, "0");
+          const day = String(d.getDate()).padStart(2, "0");
+          return `${year}-${month}-${day}`;
+        }),
       },
     );
 
@@ -629,13 +635,14 @@ onMounted(() => {
       offset-x
     >
       <VCard min-width="450px" flat>
-        <VCardTitle>
+        <VCardTitle class="d-flex align-center">
           {{ dateToYMD(selectedEventDay?.date) }}
           <VSpacer />
+          
           <VBtn
             v-if="isAdmin && (userInfo?.role !== 'user' || permission?.create)"
             color="primary"
-            size="x-small"
+            size="small"
             icon
             @click.stop="openDialog"
           >
@@ -703,7 +710,7 @@ onMounted(() => {
       offset-x
     >
       <VCard width="350px" flat>
-        <VCardTitle class="pb-0">
+        <VCardTitle class="pb-0 d-flex align-center">
           <VSpacer />
           <VMenu v-if="isAdmin">
             <template #activator="{ props: menuProps }">
