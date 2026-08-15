@@ -44,9 +44,9 @@ export function useDashboard() {
   const isLoading = ref(true)
 
   const totalList = reactive<TotalListItem[]>([
-    { name: 'Total Student', value: 0, icon: 'tabler-users', color: 'warning' },
-    { name: 'Total Teacher', value: 0, icon: 'tabler-users-group', color: 'info' },
-    { name: 'Total Admin', value: 0, icon: 'tabler-user-bolt', color: 'success' },
+    { name: 'Total Student', value: 0, icon: 'tabler-user-filled', color: 'warning' },
+    { name: 'Total Teacher', value: 0, icon: 'tabler-users', color: 'info' },
+    { name: 'Total Admin', value: 0, icon: 'tabler-user-cog', color: 'success' },
   ])
 
   const summaryList = ref<SummaryTile[]>([])

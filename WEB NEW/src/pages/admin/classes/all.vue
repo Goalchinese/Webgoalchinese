@@ -146,11 +146,15 @@
         >
           <template #item.no="{ item, index }">
             <v-chip size="small" rounded="lg" color="primary" variant="tonal">
-              {{ item.no}}
+              {{ item.no }}
             </v-chip>
           </template>
           <template #item.classType="{ item }">
-               <StatusChip type="classType" :value="item.classType?.name" rounded="lg" />
+            <StatusChip
+              type="classType"
+              :value="item.classType?.name"
+              rounded="lg"
+            />
           </template>
 
           <template #item.startDate="{ item }">
@@ -175,7 +179,11 @@
 
           <template #item.timeSlot="{ item }">
             <div v-for="(it, i) in item.classStudy" :key="i" class="mb-1">
-              <StatusChip type="timeSlot" :value="`${it.startTime} - ${it.endTime}`" rounded="lg" />
+              <StatusChip
+                type="timeSlot"
+                :value="`${it.startTime} - ${it.endTime}`"
+                rounded="lg"
+              />
             </div>
           </template>
 

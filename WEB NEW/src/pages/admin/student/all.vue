@@ -9,7 +9,7 @@
   </v-row>
 
   <v-card rounded="lg" elevation="1" class="pa-4 mb-4">
-    <v-row class="align-center mb-2" no-gutters>
+    <v-row class="align-center" no-gutters>
       <v-col cols="6" class="d-flex align-center ga-2">
         <span class="text-h5 font-weight-bold">Student</span>
 
@@ -26,7 +26,7 @@
       </v-col>
     </v-row>
 
-    <VRow dense>
+    <VRow dense align="end">
       <VCol>
         <div class="d-flex align-center">
           <h6 class="text-h6 font-weight-bold">
@@ -44,9 +44,6 @@
           </v-btn>
         </div>
       </VCol>
-    </VRow>
-
-    <v-row dense align="end">
       <v-col cols="12" sm="6" md="2">
         <AppSelect
           v-model="classTypeFilter"
@@ -80,7 +77,7 @@
           clearable
         />
       </v-col>
-    </v-row>
+    </VRow>
 
     <VRow>
       <VCol>
