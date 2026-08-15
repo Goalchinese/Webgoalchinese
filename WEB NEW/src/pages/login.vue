@@ -77,8 +77,8 @@ const onSubmit = () => {
 </script>
 
 <template>
-  <VRow no-gutters  >
-    <VCol cols="12" md="6" class=" pa-2">
+  <VRow no-gutters>
+    <VCol cols="12" md="6" class="pa-2">
       <div class="bg-primary login-card d-flex align-center justify-center">
         <div class="login-dots login-dots--top" />
         <div class="login-blob login-blob--one" />
@@ -106,85 +106,87 @@ const onSubmit = () => {
             </div>
             <v-row justify="center">
               <v-col cols="8">
-                <v-row>
-                  <v-col v-if="errorMessage" cols="12" class="pt-0">
-                    <VAlert type="error" variant="tonal" density="compact">
-                      {{ errorMessage }}
-                    </VAlert>
-                  </v-col>
-
-                  <!-- username -->
-                  <v-col cols="12">
-                    <VTextField
-                      v-model="credentials.username"
-                      autofocus
-                      label="Username"
-                      variant="solo"
-                      single-line
-                      class="login-field"
-                      :rules="[requiredValidator]"
-                    >
-                      <template #prepend-inner>
-                        <VIcon color="primary" size="25"
-                          >tabler-user-filled</VIcon
-                        >
-                      </template>
-                    </VTextField>
-                  </v-col>
-
-                  <!-- password -->
-                  <v-col cols="12">
-                    <VTextField
-                      v-model="credentials.password"
-                      label="Password"
-                      placeholder="············"
-                      single-line
-                      variant="solo"
-                      class="login-field"
-                      :rules="[requiredValidator]"
-                      :type="isPasswordVisible ? 'text' : 'password'"
-                    >
-                      <template #prepend-inner>
-                        <VIcon color="primary" size="25"
-                          >tabler-lock-filled</VIcon
-                        >
-                      </template>
-                      <template #append-inner>
-                        <VIcon
-                          color="primary"
-                          size="25"
-                          @click="isPasswordVisible = !isPasswordVisible"
-                          >{{
-                            isPasswordVisible ? "tabler-eye-off" : "tabler-eye"
-                          }}</VIcon
-                        >
-                      </template>
-                    </VTextField>
-                  </v-col>
-                  <v-col cols="12">
-                    <VCheckbox
-                      v-model="credentials.remember"
-                      base-color="white"
-                    >
-                      <template #label>
-                        <span class="text-white">Remember Me</span>
-                      </template>
-                    </VCheckbox>
-                  </v-col>
-                  <v-col cols="12">
-                    <VBtn
-                      block
-                      type="submit"
-                      color="warning"
-                      rounded="xl"
-                      size="large"
-                      :loading="loading"
-                    >
-                      Login
-                    </VBtn>
-                  </v-col>
-                </v-row>
                 <VForm ref="refVForm" @submit.prevent="onSubmit" class="w-100">
+                  <v-row>
+                    <v-col v-if="errorMessage" cols="12" class="pt-0">
+                      <VAlert type="error" variant="tonal" density="compact">
+                        {{ errorMessage }}
+                      </VAlert>
+                    </v-col>
+
+                    <!-- username -->
+                    <v-col cols="12">
+                      <VTextField
+                        v-model="credentials.username"
+                        autofocus
+                        label="Username"
+                        variant="solo"
+                        single-line
+                        class="login-field"
+                        :rules="[requiredValidator]"
+                      >
+                        <template #prepend-inner>
+                          <VIcon color="primary" size="25"
+                            >tabler-user-filled</VIcon
+                          >
+                        </template>
+                      </VTextField>
+                    </v-col>
+
+                    <!-- password -->
+                    <v-col cols="12">
+                      <VTextField
+                        v-model="credentials.password"
+                        label="Password"
+                        placeholder="············"
+                        single-line
+                        variant="solo"
+                        class="login-field"
+                        :rules="[requiredValidator]"
+                        :type="isPasswordVisible ? 'text' : 'password'"
+                      >
+                        <template #prepend-inner>
+                          <VIcon color="primary" size="25"
+                            >tabler-lock-filled</VIcon
+                          >
+                        </template>
+                        <template #append-inner>
+                          <VIcon
+                            color="primary"
+                            size="25"
+                            @click="isPasswordVisible = !isPasswordVisible"
+                            >{{
+                              isPasswordVisible
+                                ? "tabler-eye-off"
+                                : "tabler-eye"
+                            }}</VIcon
+                          >
+                        </template>
+                      </VTextField>
+                    </v-col>
+                    <v-col cols="12">
+                      <VCheckbox
+                        v-model="credentials.remember"
+                        base-color="white"
+                      >
+                        <template #label>
+                          <span class="text-white">Remember Me</span>
+                        </template>
+                      </VCheckbox>
+                    </v-col>
+                    <v-col cols="12">
+                      <VBtn
+                        block
+                        type="submit"
+                        color="warning"
+                        rounded="xl"
+                        size="large"
+                        :loading="loading"
+                      >
+                        Login
+                      </VBtn>
+                    </v-col>
+                  </v-row>
                 </VForm>
               </v-col>
             </v-row>

@@ -53,3 +53,121 @@
   font-weight: 500;
   box-shadow: none !important;
 }
+
+// Custom sidebar — gradient panel, pill logo badge, white pill active nav item
+.layout-vertical-nav {
+  overflow: hidden;
+  border-radius: 0 32px 32px 0;
+  background: rgb(var(--v-theme-primary)) !important;
+  box-shadow: none !important;
+
+  &::before {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    inset-block-end: -120px;
+    inset-inline-start: -90px;
+    inline-size: 320px;
+    block-size: 220px;
+    border-radius: 50% 50% 60% 40% / 60% 55% 45% 40%;
+    background: rgb(255 255 255 / 6%);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    inset-block-end: -140px;
+    inset-inline-start: 90px;
+    inline-size: 260px;
+    block-size: 180px;
+    border-radius: 45% 55% 40% 60% / 50% 45% 55% 50%;
+    background: rgb(255 255 255 / 4%);
+  }
+
+  .nav-header {
+    justify-content: center;
+    padding-block: 1.5rem 0.5rem;
+
+    .app-logo-title {
+      display: none;
+    }
+
+    .app-logo {
+      inline-size: 84px;
+      block-size: 84px;
+      border-radius: 50%;
+      background: rgb(255 255 255 / 100%);
+      border: 3px solid var(--v-theme-warning, #ffc107);
+      overflow: hidden;
+      margin-inline: auto;
+
+      :deep(svg),
+      :deep(img) {
+        inline-size: 100%;
+        block-size: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .header-action {
+      color: rgb(255 255 255 / 80%);
+    }
+  }
+
+  .vertical-nav-items-shadow {
+    display: none;
+  }
+
+  .nav-items {
+    padding-inline: 0.75rem;
+  }
+
+  .nav-section-title,
+  .nav-item-title,
+  .nav-item-icon {
+    color: rgb(255 255 255 / 85%) !important;
+  }
+
+  .nav-link,
+  .nav-group {
+    > a {
+      border-radius: 8px !important;
+      color: rgb(255 255 255 / 85%) !important;
+
+      .nav-item-icon {
+        color: rgb(255 255 255 / 85%) !important;
+      }
+
+      &:hover {
+        background: rgb(255 255 255 / 10%) !important;
+      }
+    }
+
+    > a.router-link-active,
+    &.active > a {
+      background: rgb(255 255 255 / 100%) !important;
+      color: rgb(var(--v-global-theme-primary)) !important;
+      box-shadow: 0 4px 10px rgb(0 0 0 / 15%);
+
+      .nav-item-icon,
+      .nav-item-title {
+        color: rgb(var(--v-global-theme-primary)) !important;
+      }
+    }
+  }
+}
+
+// Higher specificity than the theme's %nav-link-active (which also carries !important)
+// so this actually wins the cascade for the active link background/text/icon color.
+.layout-nav-type-vertical .layout-vertical-nav .nav-link > a.router-link-active,
+.layout-nav-type-vertical .layout-vertical-nav .nav-link > a.router-link-exact-active {
+  background: rgb(255 255 255 / 100%) !important;
+  color: rgb(var(--v-global-theme-primary)) !important;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 15%);
+
+  .nav-item-icon,
+  .nav-item-title {
+    color: rgb(var(--v-global-theme-primary)) !important;
+  }
+}
