@@ -224,7 +224,13 @@ async function copyClassEvent() {
     const { data } = await axios.post(
       `/classEvents/${selectedEvent.value.eventId}/dates`,
       {
-        dates: selectedDate.value?.map((date) => new Date(date).toISOString().substring(0, 10)),
+        dates: selectedDate.value?.map((date) => {
+          const d = new Date(date);
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, "0");
+          const day = String(d.getDate()).padStart(2, "0");
+          return `${year}-${month}-${day}`;
+        }),
       },
     );
 
