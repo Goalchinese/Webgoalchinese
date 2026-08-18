@@ -34,17 +34,14 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: "Invalid username or password" });
     }
 
-    const account = await Account.findOne({
-      where: { id: user.accountID, status: "Active" },
-    });
+    const [account, permissions] = await Promise.all([
+      Account.findOne({ where: { id: user.accountID, status: "Active" } }),
+      Permission.findAll({ where: { accountID: user.accountID } }),
+    ]);
     if (!account) {
       logger.warn(`Failed login attempt for user: ${user.username}`);
       return res.status(400).json({ error: "Account is not active" });
     }
-
-    const permissions = await Permission.findAll({
-      where: { accountID: user.accountID },
-    });
 
     // Step 3: Generate JWT
     const token = jwt.sign(
