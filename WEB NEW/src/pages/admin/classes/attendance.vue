@@ -31,6 +31,8 @@
       :headers="headers"
       :filter-keys="['title', 'category', 'type']"
       mobile-breakpoint="0"
+      height="calc(100vh - 320px)"
+      fixed-header
       :items="items"
     >
       <template #item.studyDay="{ item }">
@@ -150,12 +152,15 @@
         <v-row>
           <v-col cols="12">
             <AppDateTimePicker
+              name="studyDate"
+              id="studyDate"
               v-model="editItem.studyDate"
               label="Study date"
               density="compact"
               placeholder="Select date"
               :rules="[requiredValidator]"
               prepend-inner-icon="tabler-calendar"
+              :config="{ position: 'below' }"
             />
           </v-col>
           <v-col cols="12">
@@ -202,7 +207,6 @@
 
 <script setup lang="ts">
 import { useClassesAttendance } from "@/composables/useClassesAttendance";
-import { v } from "unplugin-vue-router/options-DG3niQXy.mjs";
 
 const {
   dialog,

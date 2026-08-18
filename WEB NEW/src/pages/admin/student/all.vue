@@ -89,6 +89,8 @@
           :items-length="pagination.total"
           :mobile-breakpoint="0"
           @update:options="updatePagination"
+          height="calc(100vh - 400px)"
+          fixed-header
         >
           <template #item.addmissionNo="{ item }">
             <v-chip

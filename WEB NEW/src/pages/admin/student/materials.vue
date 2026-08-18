@@ -52,6 +52,8 @@
       class="mt-4"
       return-object
       @update:options="entities.updatePagination"
+      height="calc(100vh - 400px)"
+      fixed-header
     >
       <template #item.addmissionNo="{ item }">
         <v-chip size="small" rounded="lg" color="primary" variant="tonal">
@@ -142,6 +144,8 @@
       class="mt-4"
       return-object
       @update:options="materials.updatePagination"
+      height="calc(100vh - 400px)"
+      fixed-header
     >
       <template #item.no="{ item }">
         <v-chip size="small" rounded="lg" color="primary" variant="tonal">

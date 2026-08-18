@@ -48,6 +48,8 @@
       :items-length="pagination.total"
       :mobile-breakpoint="0"
       @update:options="updatePagination"
+      height="calc(100vh - 350px)"
+      fixed-header
     >
       <template #item.teacherNo="{ item }">
         <v-chip

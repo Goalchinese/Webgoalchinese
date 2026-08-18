@@ -80,6 +80,8 @@ const {
           item-value="id"
           return-object
           @update:options="updatePaginationTeachers"
+          height="calc(100vh - 400px)"
+          fixed-header
         >
           <template #item.teacherNo="{ item }">
             <v-chip size="small" rounded="lg" color="primary" variant="tonal">
@@ -161,6 +163,8 @@ const {
           return-object
           mobile-breakpoint="0"
           @update:options="updatePaginationMaterials"
+          height="calc(100vh - 400px)"
+          fixed-header
         >
           <template #item.no="{ item }">
             <v-chip size="small" rounded="lg" color="primary" variant="tonal">

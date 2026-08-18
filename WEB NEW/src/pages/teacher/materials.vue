@@ -27,6 +27,8 @@
       :filter-keys="['title', 'category', 'type']"
       :items="items"
       mobile-breakpoint="0"
+      height="calc(100vh - 350px)"
+      fixed-header
     >
       <template #item.photo="{ item }">
         <v-avatar

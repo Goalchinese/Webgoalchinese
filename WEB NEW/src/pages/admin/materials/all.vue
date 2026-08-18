@@ -96,6 +96,8 @@
             :items-length="pagination.total"
             :mobile-breakpoint="0"
             @update:options="updatePagination"
+            height="calc(100vh - 370px)"
+            fixed-header
           >
             <template #item.no="{ item }">
               <v-chip
@@ -139,8 +141,12 @@
               }}
             </template>
             <template #item.documentType="{ item }">
-            <StatusChip type="documentType" :value="item.documentType" label />
-          </template>
+              <StatusChip
+                type="documentType"
+                :value="item.documentType"
+                label
+              />
+            </template>
             <template #item.description="{ item }">
               {{ item.description || "N/A" }}
             </template>

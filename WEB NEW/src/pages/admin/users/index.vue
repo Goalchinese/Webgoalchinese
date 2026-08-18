@@ -46,6 +46,8 @@
         :items-length="pagination.total"
         :mobile-breakpoint="0"
         @update:options="updatePagination"
+        height="calc(100vh - 370px)"
+        fixed-header
       >
         <template #item.name="{ item }">
           <div class="d-flex align-center pa-2">
