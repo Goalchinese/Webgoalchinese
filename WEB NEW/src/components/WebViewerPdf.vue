@@ -1,47 +1,60 @@
 <template>
   <div>
     <!-- Toolbar -->
-    <v-row dense justify="space-between" no-gutters>
+    <v-row justify="space-between" no-gutters>
       <v-col>
-        <v-btn icon @click="prevPage"><v-icon>tabler-chevron-left</v-icon></v-btn>
-        <v-btn icon @click="nextPage"><v-icon>tabler-chevron-right</v-icon></v-btn>
+        <v-btn variant="text" density="compact" icon="tabler-chevron-left" @click="prevPage"></v-btn>
+        <v-btn variant="text" density="compact" icon="tabler-chevron-right" @click="nextPage"></v-btn>
 
         <span>Page: {{ currentPage }} / {{ totalPages }}</span>
       </v-col>
 
       <v-col cols="auto">
-        <v-btn icon @click="zoomIn">
-          <v-icon>tabler-zoom-in</v-icon>
+        <v-btn variant="plain" icon="tabler-zoom-in" @click="zoomIn">
         </v-btn>
-        <v-btn icon @click="zoomOut">
-          <v-icon>tabler-zoom-out</v-icon>
+        <v-btn variant="plain" icon="tabler-zoom-out" @click="zoomOut"> 
         </v-btn>
-        <v-btn icon @click="printPDF">
-          <v-icon>tabler-printer</v-icon>
+        <v-btn variant="plain" icon="tabler-printer" @click="printPDF">
         </v-btn>
       </v-col>
     </v-row>
 
     <div
-      id="viewerContainer"
       class="grey lighten-4 mt-4"
-      style="width: 100%; height: 650px; overflow: auto"
+      style="position: relative; width: 100%; height: 650px"
     >
-      <div id="viewer" class="pdfViewer"></div>
+      <div
+        v-if="isLoading"
+        class="d-flex flex-column align-center justify-center"
+        style="
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          background: rgba(255, 255, 255, 0.7);
+        "
+      >
+        <v-progress-circular indeterminate color="primary" size="48" />
+        <span class="mt-2">Loading PDF...</span>
+      </div>
+
+      <div id="viewerContainer" style="width: 100%; height: 100%; overflow: auto">
+        <div id="viewer" class="pdfViewer"></div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import * as pdfjsLib from "pdfjs-dist";
-import * as pdfjsViewer from "pdfjs-dist/web/pdf_viewer.mjs";
-import pdfjsWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+import { markRaw } from "vue";
+import * as PDFJS from 'pdfjs-dist';
+import * as PDFJSViewer from 'pdfjs-dist/web/pdf_viewer.mjs';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 import "pdfjs-dist/web/pdf_viewer.css";
 
 import { PDFDocument, rgb, degrees, StandardFonts } from "pdf-lib";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+PDFJS.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 export default {
   name: "WebViewer",
@@ -57,6 +70,7 @@ export default {
       currentPage: 1,
       totalPages: 0,
       scale: 1.0,
+      isLoading: false,
     };
   },
 
@@ -80,26 +94,29 @@ export default {
       }
 
       const pdfPath = pdfUrl;
-      console.log("🚀 ~ initializeViewer ~ pdfPath:", pdfPath);
+      this.isLoading = true;
 
       // Get the container and initialize the viewer
       const container = document.getElementById("viewerContainer");
       if (!container) {
         console.error("Viewer container not found");
+        this.isLoading = false;
         return;
       }
 
-      const eventBus = new pdfjsViewer.EventBus();
+      const eventBus = new PDFJSViewer.EventBus();
 
-      this.viewer = new pdfjsViewer.PDFViewer({
-        container,
-        eventBus,
-      });
+      this.viewer = markRaw(
+        new PDFJSViewer.PDFViewer({
+          container,
+          eventBus,
+        })
+      );
 
       try {
         // Load the PDF
         console.log("🚀 Starting to load PDF from:", pdfPath);
-        this.pdfDocument = await pdfjsLib.getDocument(pdfPath).promise;
+        this.pdfDocument = markRaw(await PDFJS.getDocument(pdfPath).promise);
         console.log(
           "🚀 ~ initializeViewer ~ this.pdfDocument:",
           this.pdfDocument
@@ -129,12 +146,14 @@ export default {
         // });
         eventBus.on("pagerendered", (PDFViewer) => {
           this.addWatermarkToCanvas(PDFViewer.source.canvas);
+          this.isLoading = false;
         });
 
         console.log(`PDF loaded with ${this.pdfDocument.numPages} pages.`);
       } catch (error) {
         console.error("❌ Error loading PDF:", error);
         console.error("❌ PDF URL was:", pdfPath);
+        this.isLoading = false;
         throw error;
       }
     },
