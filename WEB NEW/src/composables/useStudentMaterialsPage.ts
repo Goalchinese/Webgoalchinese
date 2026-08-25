@@ -64,7 +64,7 @@ export function useStudentMaterialsPage() {
   const items = ref<StudentMaterialItem[]>([]);
   const fileUrl = ref("");
   const fileType = ref("");
-  const loadingDocItem = ref<StudentMaterialItem | null>(null);
+  const selectedMaterial = ref<StudentMaterialItem | null>(null);
 
   const toggleFullScreen = () => {
     // Update the fullscreen state
@@ -73,16 +73,11 @@ export function useStudentMaterialsPage() {
 
   const fetchDataMaterials = async () => {
     try {
-      console.log(
-        "🚀 ~ fetchDataMaterials ~ userInfo.id:",
-        userInfo.value.id
-      );
+   
       const { data } = await axios.get(
-        `/myMaterial/account/${userInfo.value.id}?type=student`
+        `/myMaterial/account/${userInfo.value?.id}?type=student`
       );
-      console.log("🚀 ~ fetchDataMaterials ~ raw data:", data);
       items.value = data;
-      console.log("🚀 ~ fetchDataMaterials ~ items:", items.value);
     } catch (error) {
       console.error("❌ fetchDataMaterials error:", error);
       const err = error as ApiErrorShape;
@@ -105,8 +100,9 @@ export function useStudentMaterialsPage() {
   };
 
   const openDoc = async (item: StudentMaterialItem) => {
-    if (loadingDocItem.value) return;
-    loadingDocItem.value = item;
+    if (selectedMaterial.value) return;
+    selectedMaterial.value = item;
+
     try {
       const documentType = item.material?.documentType ?? "";
       const needsDocument = ["pptx", "pdf", "mp4"].includes(documentType);
@@ -162,8 +158,8 @@ export function useStudentMaterialsPage() {
       setTimeout(() => {
         dialog.value = true;
       }, 200);
-    } finally {
-      loadingDocItem.value = null;
+    } catch (error) {
+      console.error("❌ openDoc error:", error);
     }
   };
 
@@ -181,7 +177,7 @@ export function useStudentMaterialsPage() {
     items,
     fileUrl,
     fileType,
-    loadingDocItem,
+    selectedMaterial,
     userInfo,
     baseUrl,
     toggleFullScreen,

@@ -14,7 +14,7 @@
         </v-btn>
         <v-btn variant="plain" icon="tabler-zoom-out" @click="zoomOut"> 
         </v-btn>
-        <v-btn variant="plain" icon="tabler-printer" @click="printPDF">
+        <v-btn variant="plain" icon="tabler-download" @click="printPDF">
         </v-btn>
       </v-col>
     </v-row>
@@ -62,6 +62,7 @@ export default {
     initialDoc: { type: String },
     waterMark: { type: String, default: "" },
     hideHeader: { type: Boolean, default: false },
+    item: { type: Object, default: null },
   },
   data() {
     return {
@@ -231,14 +232,25 @@ export default {
       // Create a Blob and open it for printing
       const blob = new Blob([watermarkedPdfBytes], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-      const printWindow = window.open(url);
 
-      if (printWindow) {
-        printWindow.onload = () => {
-          printWindow.print();
-          URL.revokeObjectURL(url);
-        };
-      }
+      // download the PDF directly
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${this.item?.material?.title || "document"}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // const printWindow = window.open(url);
+
+      // if (printWindow) {
+      //   printWindow.onload = () => {
+      //     printWindow.download();
+      //     URL.revokeObjectURL(url);
+      //   };
+      // }
     },
   },
 };
