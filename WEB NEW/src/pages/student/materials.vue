@@ -76,8 +76,8 @@
           color="primary"
           variant="tonal"
           class="text-none"
-          :loading="loadingDocItem === item"
-          :disabled="!!loadingDocItem && loadingDocItem !== item"
+          :loading="selectedMaterial === item"
+          :disabled="!!selectedMaterial && selectedMaterial !== item"
           @click="openDoc(item)"
         >
           view
@@ -97,6 +97,7 @@
         v-show="fileType === 'pdf'"
         :initial-doc="fileUrl"
         :water-mark="userInfo.name"
+        :item="selectedMaterial"
       />
       <iframe
         v-show="['canva', 'youtube'].includes(fileType)"
@@ -147,7 +148,7 @@ const {
   items,
   fileUrl,
   fileType,
-  loadingDocItem,
+  selectedMaterial,
   userInfo,
   baseUrl,
   openDoc,
