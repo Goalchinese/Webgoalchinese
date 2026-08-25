@@ -76,8 +76,6 @@
           color="primary"
           variant="tonal"
           class="text-none"
-          :loading="selectedMaterial === item"
-          :disabled="!!selectedMaterial && selectedMaterial !== item"
           @click="openDoc(item)"
         >
           view

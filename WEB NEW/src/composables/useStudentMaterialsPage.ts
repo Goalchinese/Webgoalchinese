@@ -100,7 +100,6 @@ export function useStudentMaterialsPage() {
   };
 
   const openDoc = async (item: StudentMaterialItem) => {
-    if (selectedMaterial.value) return;
     selectedMaterial.value = item;
 
     try {
