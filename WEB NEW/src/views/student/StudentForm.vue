@@ -230,7 +230,6 @@
             placeholder="Select date"
             density="compact"
             :readonly="flagView"
-            :rules="[requiredValidator]"
             prepend-inner-icon="tabler-calendar"
           />
         </v-col>
