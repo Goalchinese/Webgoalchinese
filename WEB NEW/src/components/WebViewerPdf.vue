@@ -123,9 +123,6 @@ export default {
           this.pdfDocument
         );
 
-        // Set the document in the viewer
-        this.viewer.setDocument(this.pdfDocument);
-
         // Optional: Enable text layer for selectable text
         // Set total pages and enable selectable text
         this.totalPages = this.pdfDocument.numPages;
@@ -136,15 +133,12 @@ export default {
           this.currentPage = this.viewer.currentPageNumber;
         });
 
-        console.log("eventBus :>> ", eventBus);
-        // eventBus.on("pagesinit", (PDFViewer) => {
-        //   console.log(" PDFViewer._pages :>> ", PDFViewer);
-        //   PDFViewer.source._pages.forEach((page) => {
-        //     console.log("🚀 ~ PDFViewer._pages.forEach ~ page:", page);
+        eventBus.on("pagesinit", () => {
+          this.viewer.currentScaleValue = "page-width";
+        });
 
-        //     this.addWatermarkToCanvas(page.canvas);
-        //   });
-        // });
+        // Set the document in the viewer
+        this.viewer.setDocument(this.pdfDocument);
         eventBus.on("pagerendered", (PDFViewer) => {
           this.addWatermarkToCanvas(PDFViewer.source.canvas);
           this.isLoading = false;
@@ -164,7 +158,7 @@ export default {
 
       // Add watermark text
       context.save();
-      context.font = "48px Arial";
+      context.font = "100px Arial";
       context.fillStyle = "rgba(178, 178, 178, 0.3)";
       context.textAlign = "center";
       context.translate(canvas.width / 2, canvas.height / 2);
@@ -207,22 +201,21 @@ export default {
       const pages = pdfDoc.getPages();
       const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
+      const text = this.waterMark || "Confidential";
+      const fontSize = 100;
+      const textWidth = helveticaFont.widthOfTextAtSize(text, fontSize);
+
       pages.forEach((page) => {
         const { width, height } = page.getSize();
 
-        let originX = width / 2;
-        let originY = height / 3;
-
-        const textWidth = helveticaFont.widthOfTextAtSize(this.waterMark, 32);
-        // const textHeight = helveticaFont.heightAtSize(32);
-
-        page.drawText(this.waterMark || "Confidential", {
-          x: originX - textWidth / 3,
-          y: originY,
-          size: 32,
-          color: rgb(0.7, 0.7, 0.7, 0.3),
+        page.drawText(text, {
+          x: width / 2 - textWidth / 2,
+          y: height / 2,
+          size: fontSize,
+          font: helveticaFont,
+          color: rgb(0.5, 0.5, 0.5),
           rotate: degrees(45),
-          opacity: 0.3,
+          opacity: 0.4,
         });
       });
 
