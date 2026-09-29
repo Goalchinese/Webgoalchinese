@@ -119,6 +119,7 @@ exports.findAll = async (req, res) => {
         as: "attendance",
         attributes: ["id", "classId", "studyDate", "status", "note"],
         separate: true,
+        where: { status: { [Op.ne]: "" } },
       },
     ];
     const order = [
